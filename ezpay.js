@@ -25,7 +25,7 @@
     EZ.$("checkoutRouteContent").innerHTML=
       '<div class="live-checkout"><div class="live-checkout-inner">'+
       '<section class="live-summary" style="background:linear-gradient(155deg,#10172a 0%,'+EZ.escape(accent)+' 160%)">'+
-      '<div class="checkout-brand-preview"><i>'+EZ.escape((page.brand||"E")[0].toUpperCase())+'</i>'+EZ.escape(page.brand||"EZPay")+'</div>'+
+      '<div class="checkout-brand-preview">'+(page.logoData?'<img src="'+EZ.escape(page.logoData)+'" alt="" />':'<span class="brand-fallback">'+EZ.escape((page.brand||"E")[0].toUpperCase())+'</span>')+EZ.escape(page.brand||"EZPay")+'</div>'+
       '<h1>'+EZ.escape(page.headline)+'</h1><p>'+EZ.escape(page.description||product.description||"")+'</p>'+
       '<div class="live-price" id="livePrice">'+(defaultPrice?EZ.money(defaultPrice.amount,defaultPrice.currency):"$0.00")+' <small>'+EZ.escape(EZ.interval(defaultPrice))+'</small></div>'+
       '<div class="preview-order"><span>'+EZ.escape(product.name)+'</span><strong>Sandbox</strong></div></section>'+
@@ -206,7 +206,7 @@
     const page=EZ.editingPageId?EZ.page(EZ.editingPageId):null;
     if(page)EZ.openCheckout(page);else EZ.toast("Publish first","Publishing creates a shareable checkout URL.");
   };
-  EZ.$("builderProduct").onchange=()=>{
+  EZ.$("builderLogo").addEventListener("change",(event)=>{\n    const file=event.target.files?.[0];\n    if(!file)return;\n    if(file.size>400*1024){EZ.toast("Logo is too large","Use an image under 400 KB.");event.target.value="";return;}\n    const reader=new FileReader();\n    reader.onload=()=>{EZ.builderLogoData=String(reader.result||"");EZ.updatePreview();EZ.toast("Logo added");};\n    reader.readAsDataURL(file);\n  });\n\n  EZ.$("builderProduct").onchange=()=>{
     EZ.populateBuilderPrices();
     const product=EZ.product(EZ.$("builderProduct").value);
     if(product)EZ.$("builderDescription").value=product.description||"";

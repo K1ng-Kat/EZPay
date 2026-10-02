@@ -14,7 +14,7 @@ export async function onRequestGet({request,env}) {
     env.DB.prepare("SELECT * FROM workspace_settings WHERE id='workspace'").first(),
     env.DB.prepare("SELECT * FROM products WHERE active=1 ORDER BY created_at ASC").all(),
     env.DB.prepare("SELECT * FROM prices ORDER BY created_at ASC").all(),
-    env.DB.prepare("SELECT * FROM payment_pages ORDER BY updated_at DESC").all(),
+    env.DB.prepare("SELECT pp.* FROM payment_pages pp JOIN products p ON p.id=pp.product_id WHERE p.active=1 ORDER BY pp.updated_at DESC").all(),
     env.DB.prepare("SELECT * FROM customers ORDER BY created_at DESC").all(),
     env.DB.prepare("SELECT * FROM payments ORDER BY created_at DESC LIMIT 1000").all(),
     env.DB.prepare("SELECT * FROM subscriptions ORDER BY started_at DESC LIMIT 1000").all(),
@@ -73,9 +73,13 @@ export async function onRequestPut({request,env}) {
   const products=Array.isArray(body.products)?body.products:[];
   const pages=Array.isArray(body.pages)?body.pages:[];
 
+  const existingPages=await env.DB.prepare("SELECT id FROM payment_pages").all();
+  const incomingPageIds=new Set(pages.map(page=>String(page?.id||"")).filter(Boolean));
+
   const statements=[
-    env.DB.prepare(
-      "INSERT INTO workspace_settings (id,business_name,accent,support_email,updated_at) VALUES ('workspace',?,?,?,?) "+
+    env.DB.prepare("UPDATE products SET active=0,updated_at=?").bind(now()),
+    env.DB.prepare("UPDATE prices SET active=0,updated_at=?").bind(now()),
+    env.DB.prepare(\n      "INSERT INTO workspace_settings (id,business_name,accent,support_email,updated_at) VALUES ('workspace',?,?,?,?) "+
       "ON CONFLICT(id) DO UPDATE SET business_name=excluded.business_name,accent=excluded.accent,support_email=excluded.support_email,updated_at=excluded.updated_at"
     ).bind(
       String(settings.businessName||"EZPay").slice(0,120),
@@ -128,6 +132,12 @@ export async function onRequestPut({request,env}) {
       Math.max(0,Math.min(365,Number(page.trialDays||0))),page.published?1:0,String(page.logoData||"").slice(0,600000),
       Number(page.created||now()),now()
     ));
+  }
+
+  for(const existing of existingPages.results||[]) {
+    if(!incomingPageIds.has(String(existing.id))) {
+      statements.push(env.DB.prepare("DELETE FROM payment_pages WHERE id=?").bind(existing.id));
+    }
   }
 
   await env.DB.batch(statements);

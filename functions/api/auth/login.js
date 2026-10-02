@@ -13,8 +13,8 @@ export async function onRequestPost(context) {
   try { body=await readJson(request); }
   catch { return error("Invalid JSON request",400); }
 
-  const ok=await verifyOwnerPassword(body.password,env);
-  if(!ok) {
+  const verification=await verifyOwnerPassword(body.password,env);
+  if(!verification.ok) {
     await env.DB.prepare("DELETE FROM sessions WHERE expires_at<=?").bind(now()).run();
     return error("Incorrect password",401,"invalid_credentials");
   }
@@ -22,7 +22,12 @@ export async function onRequestPost(context) {
   await env.DB.prepare("DELETE FROM sessions WHERE expires_at<=?").bind(now()).run();
   const session=await createSession(env);
   return json(
-    {authenticated:true,email:env.EZPAY_OWNER_EMAIL||"owner@ezpay.local",expiresAt:session.expires},
+    {
+      authenticated:true,
+      email:session.email,
+      expiresAt:session.expires,
+      mustChangePassword:session.mustChangePassword
+    },
     200,
     {"set-cookie":sessionCookie(session.token,session.expires)}
   );

@@ -1,37 +1,37 @@
 # EZPay
 
-Private payment operations dashboard and checkout layer built with Next.js, TypeScript, Stripe Elements, and Stripe PaymentIntents.
+EZPay is an independent payments-platform project. The goal is to build a Stripe-style control plane and API around EZPay's own payment-intent model, ledger, risk engine, settlement adapters, disputes, billing, payouts, wallet adapters, and developer tooling.
 
-## Implemented
+EZPay is **not a Stripe wrapper**.
 
+## Current state
+
+The repository currently contains:
+
+- A detailed dashboard and operator console
 - Owner-only signed dashboard sessions
-- Payments, balances, payouts, customers, products, subscriptions, invoices, payment links, disputes, risk controls, reports, developer tools, API keys, webhooks, logs, and settings
-- Dynamic Payment Element checkout
-- Express Checkout Element for eligible wallets
-- Cards, wallet methods, bank debit/redirect methods, BNPL, vouchers, and regional methods via provider eligibility
-- Private server-to-server EZPay payment API
-- Verified Stripe webhook endpoint
-- Idempotency support
-- Server-owned hosted-checkout pricing
-- Same-origin protection for browser payment creation
-- Hardened browser security headers
+- EZPay-native `PaymentIntent` objects and sandbox API
+- Payment-method / rail adapter registry
+- Payments, balances, payouts, customers, products, subscriptions, invoices, payment links, disputes, risk, ledger, reports, developer tools, API keys, webhooks, and security surfaces
+- A sandbox checkout that intentionally does **not** collect raw card/bank credentials
+- A static GitHub Pages build on the `gh-pages` branch
 - Bank connection explicitly unsupported
 
-## Environment variables
+## Important architecture boundary
 
-Copy `.env.example` to `.env.local` and configure:
+A real direct payments platform cannot safely become a production card/bank processor using only frontend code or GitHub Pages.
 
-```bash
-STRIPE_SECRET_KEY=
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
-STRIPE_WEBHOOK_SECRET=
+Production support for card networks, Apple Pay, Google Pay, Amazon Pay, Cash App Pay, ACH, PayPal, bank redirects, BNPL, or other methods requires the relevant commercial/technical access, such as:
 
-EZPAY_OWNER_PASSWORD=
-EZPAY_SESSION_SECRET=
-EZPAY_API_SECRET=
-```
+- acquiring / acquiring-processor connectivity
+- sponsor-bank or ODFI relationships for ACH
+- wallet merchant onboarding and credentials
+- card-network and dispute-rule compliance
+- PCI DSS controls and a properly scoped card-data environment
+- KMS/HSM-backed encryption and tokenization
+- settlement, reconciliation, reserves, fraud controls, monitoring, and incident response
 
-Use long, randomly generated values for `EZPAY_SESSION_SECRET` and `EZPAY_API_SECRET`.
+The codebase therefore keeps payment rails behind EZPay-owned adapters instead of pretending unsupported rails are already live.
 
 ## Local development
 
@@ -40,26 +40,51 @@ npm install
 npm run dev
 ```
 
-Open `/login` for the private dashboard and `/checkout` for the public checkout.
+Open:
 
-## Payment methods
+- `/login` — private EZPay operator dashboard
+- `/checkout` — sandbox checkout prototype
+- `POST /api/v1/payments` — authenticated EZPay sandbox PaymentIntent API
 
-EZPay uses dynamic payment methods instead of hard-coding a promise that every method will appear. The configured processor decides which enabled methods are eligible for a specific account and transaction based on business location/category, customer location, currency, amount, browser, device, and method-specific restrictions.
-
-Express Checkout can surface eligible express methods such as Apple Pay, Google Pay, Link, Amazon Pay, PayPal, and Klarna. The Payment Element can surface eligible cards, Cash App Pay, ACH/bank methods, BNPL, vouchers, and regional payment methods.
-
-## Security model
-
-Sensitive payment credentials are collected by provider-hosted Elements and are not posted to EZPay. Fulfillment must rely on verified webhook state, not only the browser success page.
-
-For production, also use infrastructure-level rate limiting/WAF rules, persistent database-backed event/audit storage, secret rotation, backups, and MFA/passkeys for the owner account.
-
-## Wallet domain registration
-
-After deploying your checkout domain, register its hostname with Stripe so eligible web wallets can appear:
+## Environment
 
 ```bash
-STRIPE_SECRET_KEY=sk_... npm run register:domain -- pay.example.com
+EZPAY_OWNER_PASSWORD=
+EZPAY_SESSION_SECRET=
+EZPAY_API_SECRET=
+EZPAY_WEBHOOK_SIGNING_SECRET=
+EZPAY_TOKENIZATION_MASTER_KEY_ID=
+EZPAY_ENVIRONMENT=sandbox
 ```
 
-For this Stripe Elements web integration, EZPay does not need a separate Apple API key in code. The deployed domain must be registered with Stripe for supported web payment methods such as Apple Pay, Google Pay, and Link.
+Never commit production secrets.
+
+## GitHub Pages
+
+The static public site is stored on the `gh-pages` branch and contains no production secrets or credential-collection code.
+
+Configure the Pages publishing source to:
+
+- Branch: `gh-pages`
+- Folder: `/ (root)`
+
+The expected project URL is:
+
+`https://k1ng-kat.github.io/EZPay/`
+
+## Security direction
+
+Before any real-money launch, EZPay should add:
+
+- passkeys/MFA for operators
+- database-backed immutable audit/event storage
+- append-only double-entry ledger persistence
+- secret rotation and HSM/KMS-backed key management
+- infrastructure WAF/rate limiting/DDoS protection
+- idempotency persistence
+- signed webhooks with replay protection
+- PCI DSS design and validation
+- compliant card/token vault or certified hosted fields
+- risk/fraud controls and manual review tooling
+- reconciliation against external settlement files
+- backups, incident response, monitoring, and alerting

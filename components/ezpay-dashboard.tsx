@@ -547,9 +547,13 @@ function DevelopersPage() {
       </div>
       <div className="code-card">
         <div className="code-head"><span>Create a payment</span><span>Node.js</span></div>
-        <pre>{`const response = await fetch("/api/payments", {
+        <pre>{`const response = await fetch("/api/v1/payments", {
   method: "POST",
-  headers: { "Content-Type": "application/json" },
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer YOUR_EZPAY_API_SECRET",
+    "Idempotency-Key": crypto.randomUUID()
+  },
   body: JSON.stringify({
     amount: 14900,
     currency: "usd",

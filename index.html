@@ -5,243 +5,277 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b1020" />
   <title>EZPay — Payments infrastructure</title>
-  <meta name="description" content="EZPay is a private payments operating system for authorization, wallets, risk, ledgering, payouts, disputes, billing, and developer APIs." />
+  <meta name="description" content="EZPay sandbox payments operating system with products, subscriptions, customers, payment pages, and developer tools." />
   <link rel="stylesheet" href="./ezpay.css" />
 </head>
 <body>
-  <div class="shell">
+  <div id="app">
     <aside class="sidebar" id="sidebar">
       <div class="brand">
-        <div class="logo">EZ</div>
-        <div>
-          <strong>EZPay</strong>
-          <span>payments infrastructure</span>
-        </div>
+        <div class="brand-mark">EZ</div>
+        <div class="brand-copy"><strong>EZPay</strong><span>Payments</span></div>
       </div>
 
-      <button class="workspace">
-        <span><strong>EZPay Sandbox</strong><small>Test environment</small></span>
-        <span>⌄</span>
+      <button class="account-switcher">
+        <div class="account-dot">E</div>
+        <span><strong>EZPay</strong><small>Sandbox workspace</small></span>
+        <b>⌄</b>
       </button>
 
-      <nav>
-        <p>OVERVIEW</p>
-        <button class="nav active" data-view="home">⌂ <span>Home</span></button>
-        <button class="nav" data-view="payments">▣ <span>Payments</span></button>
-        <button class="nav" data-view="methods">◫ <span>Payment methods</span></button>
-        <button class="nav" data-view="balances">$ <span>Balances & payouts</span></button>
-        <button class="nav" data-view="customers">◎ <span>Customers</span></button>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <button class="nav-item active" data-view="home"><span class="nav-icon">⌂</span>Home</button>
+          <button class="nav-item" data-view="payments"><span class="nav-icon">▣</span>Payments</button>
+          <button class="nav-item" data-view="balances"><span class="nav-icon">$</span>Balances</button>
+          <button class="nav-item" data-view="customers"><span class="nav-icon">◎</span>Customers</button>
+        </div>
 
-        <p>BILLING</p>
-        <button class="nav" data-view="products">□ <span>Products</span></button>
-        <button class="nav" data-view="subscriptions">↻ <span>Subscriptions</span></button>
-        <button class="nav" data-view="invoices">▤ <span>Invoices</span></button>
-        <button class="nav" data-view="links">↗ <span>Payment links</span></button>
+        <div class="nav-label">More</div>
+        <div class="nav-section">
+          <button class="nav-item" data-view="products"><span class="nav-icon">□</span>Product catalog</button>
+          <button class="nav-item" data-view="subscriptions"><span class="nav-icon">↻</span>Subscriptions</button>
+          <button class="nav-item" data-view="pages"><span class="nav-icon">↗</span>Payment pages</button>
+          <button class="nav-item" data-view="risk"><span class="nav-icon">◇</span>Risk</button>
+          <button class="nav-item" data-view="developers"><span class="nav-icon">&lt;/&gt;</span>Developers</button>
+        </div>
 
-        <p>RISK & OPERATIONS</p>
-        <button class="nav" data-view="risk">◇ <span>Risk engine</span></button>
-        <button class="nav" data-view="disputes">⚠ <span>Disputes</span><b class="count">2</b></button>
-        <button class="nav" data-view="ledger">≡ <span>Ledger</span></button>
-        <button class="nav" data-view="settlement">⇄ <span>Settlement</span></button>
-
-        <p>DEVELOPERS</p>
-        <button class="nav" data-view="developers">&lt;/&gt; <span>Developer home</span></button>
-        <button class="nav" data-view="keys">⌘ <span>API keys</span></button>
-        <button class="nav" data-view="webhooks">⌁ <span>Webhooks</span></button>
-        <button class="nav" data-view="security">⛨ <span>Security</span></button>
+        <div class="nav-label">Workspace</div>
+        <div class="nav-section">
+          <button class="nav-item" data-view="settings"><span class="nav-icon">⚙</span>Settings</button>
+        </div>
       </nav>
 
-      <div class="sidebar-foot">
-        <span class="status-dot"></span>
-        <span>Static demo · no secrets exposed</span>
+      <div class="sidebar-footer">
+        <div class="sandbox-indicator"><i></i><span>Sandbox mode</span></div>
+        <button id="resetDemoButton">Reset demo data</button>
       </div>
     </aside>
 
-    <main>
+    <main class="main">
       <header class="topbar">
-        <button class="menu" id="menuButton">☰</button>
-        <div class="search">⌕ <input id="globalSearch" placeholder="Search EZPay…" /></div>
-        <div class="top-actions">
-          <div class="mode"><button class="on">TEST</button><button>LIVE</button></div>
-          <button class="icon">↻</button>
-          <button class="icon">◔</button>
-          <div class="avatar">MK</div>
+        <button class="mobile-menu" id="mobileMenu">☰</button>
+        <div class="global-search">
+          <span>⌕</span>
+          <input id="globalSearch" placeholder="Search payments, customers, products…" autocomplete="off" />
+          <kbd>⌘ K</kbd>
         </div>
+        <div class="topbar-spacer"></div>
+        <div class="mode-switch" role="group" aria-label="Environment">
+          <button class="active">Test</button>
+          <button disabled title="Production rails are not connected">Live</button>
+        </div>
+        <button class="top-icon" id="refreshButton" title="Refresh">↻</button>
+        <button class="top-icon" title="Notifications">◔</button>
+        <div class="user-avatar">MK</div>
       </header>
 
-      <section class="content">
-        <div class="page-head">
+      <section class="workspace">
+        <div class="page-heading">
           <div>
-            <span class="eyebrow">EZPAY CONTROL PLANE</span>
-            <h1 id="pageTitle">Overview</h1>
-            <p id="pageSubtitle">Your payments system at a glance.</p>
+            <h1 id="pageTitle">Home</h1>
+            <p id="pageSubtitle">Overview of your sandbox payment activity.</p>
           </div>
-          <div class="head-actions">
-            <button class="secondary">Export</button>
-            <button class="primary">+ Create</button>
-          </div>
+          <div class="page-actions" id="pageActions"></div>
         </div>
 
-        <section class="view active" id="home">
-          <div class="notice info">
-            <strong>EZPay is independent infrastructure.</strong>
-            <span>This site represents EZPay's own payment orchestration, tokenization boundary, ledger, risk engine, settlement layer, and developer APIs. No third-party processor branding is used.</span>
-          </div>
-
-          <div class="metrics">
-            <article class="metric"><span>Gross volume</span><strong>$12,482.79</strong><small class="up">+18.4% <em>vs previous period</em></small></article>
-            <article class="metric"><span>Net volume</span><strong>$11,936.22</strong><small class="up">+17.9% <em>after refunds</em></small></article>
-            <article class="metric"><span>Successful payments</span><strong>284</strong><small class="up">98.6% <em>authorization rate</em></small></article>
-            <article class="metric"><span>Recurring revenue</span><strong>$4,219.00</strong><small class="up">+9.2% <em>monthly run rate</em></small></article>
-          </div>
-
-          <div class="grid two section-gap">
-            <article class="panel">
-              <div class="panel-head"><div><h2>Payment volume</h2><span>Last 30 days · USD</span></div><button class="chip">30 days⌄</button></div>
-              <div class="chart" id="chart"></div>
+        <section class="view active" id="view-home">
+          <div class="stats-grid" id="homeStats"></div>
+          <div class="home-grid gap-top">
+            <article class="card chart-card">
+              <div class="card-head">
+                <div><h2>Gross volume</h2><p>Sandbox payment volume</p></div>
+                <button class="small-button">Last 30 days⌄</button>
+              </div>
+              <div class="chart-value" id="chartValue">$0.00</div>
+              <div class="bar-chart" id="volumeChart"></div>
               <div class="chart-axis"><span>Sep 3</span><span>Sep 10</span><span>Sep 17</span><span>Sep 24</span><span>Oct 2</span></div>
             </article>
 
-            <article class="panel pad">
-              <div class="panel-head"><div><h2>Funds</h2><span>Internal ledger balances</span></div></div>
-              <div class="balance"><span><i class="green"></i> Available</span><strong>$7,420.18</strong></div>
-              <div class="balance"><span><i class="amber"></i> Pending</span><strong>$1,838.62</strong></div>
-              <button class="primary full">Create payout</button>
+            <article class="card balance-card">
+              <div class="card-head"><div><h2>Balances</h2><p>Sandbox ledger</p></div><button class="text-button" data-view-jump="balances">View</button></div>
+              <div id="balanceSummary"></div>
             </article>
           </div>
 
-          <article class="panel section-gap">
-            <div class="panel-head pad"><div><h2>Recent payments</h2><span>Authorization and capture activity</span></div><button class="chip">Filter</button></div>
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>Amount</th><th>Status</th><th>Description</th><th>Customer</th><th>Method</th><th>Created</th></tr></thead>
-                <tbody>
-                  <tr><td>$149.00</td><td><b class="badge success">Succeeded</b></td><td>Aura Pro annual</td><td>moshe@example.com</td><td>Card •••• 4242</td><td>12:04 AM</td></tr>
-                  <tr><td>$39.00</td><td><b class="badge success">Succeeded</b></td><td>Middos Starter</td><td>school@example.org</td><td>Apple Pay</td><td>Yesterday</td></tr>
-                  <tr><td>$249.00</td><td><b class="badge warning">Processing</b></td><td>Middos Growth</td><td>admin@example.org</td><td>ACH debit</td><td>Yesterday</td></tr>
-                  <tr><td>$9.99</td><td><b class="badge info">Refunded</b></td><td>Test item</td><td>buyer@example.com</td><td>Google Pay</td><td>Sep 30</td></tr>
-                </tbody>
-              </table>
+          <article class="card gap-top">
+            <div class="card-head padded"><div><h2>Recent payments</h2><p>Latest sandbox activity</p></div><button class="small-button" data-view-jump="payments">View all</button></div>
+            <div class="table-wrap"><table><thead><tr><th>Amount</th><th>Status</th><th>Customer</th><th>Product</th><th>Method</th><th>Created</th></tr></thead><tbody id="homePaymentsBody"></tbody></table></div>
+          </article>
+
+          <div class="quick-grid gap-top">
+            <button class="quick-action" data-action="new-page"><span>↗</span><div><strong>Create payment page</strong><small>Publish an Aura subscription checkout</small></div><b>›</b></button>
+            <button class="quick-action" data-action="new-product"><span>□</span><div><strong>Add product</strong><small>Create a product and recurring price</small></div><b>›</b></button>
+            <button class="quick-action" data-action="open-aura"><span>A</span><div><strong>Open Aura checkout</strong><small>Test your seeded Aura Pro page</small></div><b>›</b></button>
+          </div>
+        </section>
+
+        <section class="view" id="view-payments">
+          <div class="stats-grid" id="paymentStats"></div>
+          <article class="card gap-top">
+            <div class="toolbar">
+              <div class="toolbar-title"><h2>Payments</h2><span id="paymentCount"></span></div>
+              <div class="toolbar-spacer"></div>
+              <input class="table-search" id="paymentSearch" placeholder="Search payments" />
+              <select class="select" id="paymentStatusFilter"><option value="all">All statuses</option><option value="succeeded">Succeeded</option><option value="failed">Failed</option></select>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>Amount</th><th>Status</th><th>Customer</th><th>Description</th><th>Method</th><th>Created</th></tr></thead><tbody id="paymentsBody"></tbody></table></div>
+          </article>
+        </section>
+
+        <section class="view" id="view-balances">
+          <div class="stats-grid" id="balanceStats"></div>
+          <div class="two-col gap-top">
+            <article class="card panel-pad"><div class="card-head"><div><h2>Available balance</h2><p>Sandbox funds available for payout</p></div></div><div class="hero-number" id="availableBalance">$0.00</div><button class="primary-button" id="createPayoutButton">Create sandbox payout</button></article>
+            <article class="card panel-pad"><div class="card-head"><div><h2>Payout schedule</h2><p>How funds move from the EZPay ledger</p></div></div><div class="setting-row"><div><strong>Manual in sandbox</strong><small>Production settlement adapter not connected</small></div><span class="pill neutral">Sandbox</span></div></article>
+          </div>
+          <article class="card gap-top"><div class="card-head padded"><div><h2>Payouts</h2><p>Created from sandbox balance</p></div></div><div class="table-wrap"><table><thead><tr><th>Amount</th><th>Status</th><th>Destination</th><th>Created</th></tr></thead><tbody id="payoutsBody"></tbody></table></div></article>
+        </section>
+
+        <section class="view" id="view-customers">
+          <article class="card">
+            <div class="toolbar"><div class="toolbar-title"><h2>Customers</h2><span id="customerCount"></span></div><div class="toolbar-spacer"></div><input class="table-search" id="customerSearch" placeholder="Search customers" /></div>
+            <div class="table-wrap"><table><thead><tr><th>Customer</th><th>Email</th><th>Lifetime value</th><th>Payments</th><th>Subscriptions</th><th>Created</th></tr></thead><tbody id="customersBody"></tbody></table></div>
+          </article>
+        </section>
+
+        <section class="view" id="view-products">
+          <div class="catalog-grid" id="productGrid"></div>
+          <div class="empty-state hidden" id="productsEmpty"><div>□</div><h3>No products yet</h3><p>Create a product and add monthly, yearly, or one-time prices.</p><button class="primary-button" data-action="new-product">Add product</button></div>
+        </section>
+
+        <section class="view" id="view-subscriptions">
+          <div class="stats-grid" id="subscriptionStats"></div>
+          <article class="card gap-top">
+            <div class="toolbar"><div class="toolbar-title"><h2>Subscriptions</h2><span id="subscriptionCount"></span></div><div class="toolbar-spacer"></div><input class="table-search" id="subscriptionSearch" placeholder="Search subscriptions" /></div>
+            <div class="table-wrap"><table><thead><tr><th>Customer</th><th>Product</th><th>Price</th><th>Status</th><th>Started</th><th>Next renewal</th></tr></thead><tbody id="subscriptionsBody"></tbody></table></div>
+          </article>
+        </section>
+
+        <section class="view" id="view-pages">
+          <div class="page-list-grid" id="paymentPagesGrid"></div>
+          <div class="empty-state hidden" id="pagesEmpty"><div>↗</div><h3>No payment pages yet</h3><p>Build a branded subscription checkout without writing code.</p><button class="primary-button" data-action="new-page">Create payment page</button></div>
+        </section>
+
+        <section class="view" id="view-risk">
+          <div class="stats-grid">
+            <article class="stat-card"><span>Blocked attempts</span><strong id="blockedCount">0</strong><small>Sandbox declined payments</small></article>
+            <article class="stat-card"><span>Rules</span><strong>4</strong><small>Enabled in sandbox</small></article>
+            <article class="stat-card"><span>3DS policy</span><strong>Adaptive</strong><small>Production adapter required</small></article>
+            <article class="stat-card"><span>Card data stored</span><strong>0</strong><small>Sandbox test card values are discarded</small></article>
+          </div>
+          <article class="card panel-pad gap-top">
+            <div class="card-head"><div><h2>Risk rules</h2><p>Applied before a sandbox payment succeeds</p></div></div>
+            <div class="rule-list">
+              <div><div><strong>Reject non-test card numbers</strong><small>Prevents the Pages demo from accepting real payment credentials.</small></div><button class="switch on" aria-label="Enabled"></button></div>
+              <div><div><strong>Decline 4000 0000 0000 0002</strong><small>Deterministic sandbox decline card.</small></div><button class="switch on" aria-label="Enabled"></button></div>
+              <div><div><strong>Duplicate checkout protection</strong><small>Prevents a double-submit from creating two subscriptions.</small></div><button class="switch on" aria-label="Enabled"></button></div>
+              <div><div><strong>No bank-login storage</strong><small>Persistent bank connection remains unsupported.</small></div><button class="switch on" aria-label="Enabled"></button></div>
             </div>
           </article>
         </section>
 
-        <section class="view" id="payments">
-          <div class="metrics">
-            <article class="metric"><span>Today</span><strong>$1,482.41</strong><small class="up">+14.2%</small></article>
-            <article class="metric"><span>Authorization rate</span><strong>98.6%</strong><small class="up">+0.8%</small></article>
-            <article class="metric"><span>Refunds</span><strong>$129.48</strong><small>4 refunds</small></article>
-            <article class="metric"><span>Failed</span><strong>$87.00</strong><small>3 attempts</small></article>
-          </div>
-          <div class="panel section-gap pad">
-            <div class="panel-head"><div><h2>Payments pipeline</h2><span>Authorize → authenticate → capture → ledger → settle</span></div></div>
-            <div class="pipeline">
-              <div><b>1</b><strong>Authorize</strong><span>Validate payment credentials and request issuer authorization.</span></div>
-              <div><b>2</b><strong>Authenticate</strong><span>Apply 3DS/SCA or wallet cryptogram validation when required.</span></div>
-              <div><b>3</b><strong>Capture</strong><span>Confirm the authorized amount for clearing.</span></div>
-              <div><b>4</b><strong>Ledger</strong><span>Post immutable double-entry balance movements.</span></div>
-              <div><b>5</b><strong>Settle</strong><span>Reconcile network settlement and merchant payout state.</span></div>
-            </div>
-          </div>
-        </section>
-
-        <section class="view" id="methods">
-          <div class="notice warning"><strong>Bank connection is unsupported.</strong><span>EZPay can support bank-payment rails such as ACH, but persistent consumer bank aggregation / online-banking credential connections are intentionally not part of this product.</span></div>
-          <div class="method-grid section-gap">
-            <article class="method-card"><h3>Cards</h3><p>Direct network/acquirer integrations for debit and credit cards.</p><div class="tags"><span>Visa</span><span>Mastercard</span><span>Amex</span><span>Discover</span><span>JCB</span><span>UnionPay</span></div></article>
-            <article class="method-card"><h3>Wallets</h3><p>Tokenized device and web wallets through first-party wallet integrations.</p><div class="tags"><span>Apple Pay</span><span>Google Pay</span><span>Amazon Pay</span><span>Cash App Pay</span><span>PayPal</span><span>Link-style wallet</span></div></article>
-            <article class="method-card"><h3>Bank debits</h3><p>Account-to-account payment rails with mandate and return handling.</p><div class="tags"><span>ACH</span><span>SEPA DD</span><span>Bacs DD</span><span>BECS</span></div></article>
-            <article class="method-card"><h3>Real-time & redirects</h3><p>Country-specific authenticated pay-by-bank methods.</p><div class="tags"><span>iDEAL</span><span>BLIK</span><span>FPX</span><span>Pix</span><span>UPI</span><span>PayNow</span></div></article>
-            <article class="method-card"><h3>Buy now, pay later</h3><p>Adapter architecture for external credit providers.</p><div class="tags"><span>Klarna</span><span>Affirm</span><span>Afterpay</span><span>Zip</span></div></article>
-            <article class="method-card"><h3>Cash & vouchers</h3><p>Offline voucher and cash-network methods where commercially supported.</p><div class="tags"><span>OXXO</span><span>Konbini</span><span>Boleto</span><span>Multibanco</span></div></article>
-          </div>
-          <div class="notice info section-gap"><strong>Integration status</strong><span>The GitHub Pages build is a control-plane/demo frontend. Actual production acceptance for Apple Pay, Google Pay, Amazon Pay, Cash App Pay, cards, ACH, and other methods requires direct commercial/technical onboarding with the applicable wallet, acquirer, sponsor bank, processor/network, or payment provider. Static GitHub Pages cannot perform that server-side role.</span></div>
-        </section>
-
-        <section class="view" id="balances">
-          <div class="metrics">
-            <article class="metric"><span>Available</span><strong>$7,420.18</strong><small>merchant payable</small></article>
-            <article class="metric"><span>Pending</span><strong>$1,838.62</strong><small>not yet settled</small></article>
-            <article class="metric"><span>Reserve</span><strong>$402.00</strong><small>risk reserve</small></article>
-            <article class="metric"><span>Lifetime payouts</span><strong>$38,925.77</strong><small>42 payouts</small></article>
-          </div>
-          <article class="panel pad section-gap"><h2>Settlement waterfall</h2><div class="pipeline compact"><div><b>1</b><strong>Clearing</strong><span>Network file received</span></div><div><b>2</b><strong>Reconciliation</strong><span>Match transaction IDs</span></div><div><b>3</b><strong>Netting</strong><span>Fees/refunds/disputes</span></div><div><b>4</b><strong>Payout</strong><span>Merchant disbursement</span></div></div></article>
-        </section>
-
-        <section class="view" id="customers">
-          <article class="panel"><div class="panel-head pad"><div><h2>Customers</h2><span>Profiles and lifetime payment history</span></div></div><div class="table-wrap"><table><thead><tr><th>Customer</th><th>Email</th><th>Lifetime value</th><th>Payments</th><th>Status</th></tr></thead><tbody><tr><td>Moshe Katz</td><td>moshe@example.com</td><td>$632.00</td><td>8</td><td><b class="badge success">Active</b></td></tr><tr><td>YLS Admin</td><td>admin@example.org</td><td>$2,948.00</td><td>19</td><td><b class="badge success">Active</b></td></tr><tr><td>Aura Customer</td><td>creator@example.com</td><td>$228.00</td><td>4</td><td><b class="badge success">Active</b></td></tr></tbody></table></div></article>
-        </section>
-
-        <section class="view" id="products">
-          <div class="catalog"><article><span>SOFTWARE</span><h3>Aura Pro</h3><strong>$14.99/mo</strong><small>$149/year</small></article><article><span>SAAS</span><h3>Middos Starter</h3><strong>$39/mo</strong><small>Recurring</small></article><article><span>SAAS</span><h3>Middos Growth</h3><strong>$249/mo</strong><small>Recurring</small></article><article><span>ADD-ON</span><h3>Aura Studio Pack</h3><strong>$79</strong><small>One time</small></article></div>
-        </section>
-
-        <section class="view" id="subscriptions">
-          <div class="metrics"><article class="metric"><span>MRR</span><strong>$4,219</strong><small class="up">+9.2%</small></article><article class="metric"><span>Active</span><strong>61</strong><small>subscriptions</small></article><article class="metric"><span>Churn</span><strong>2.8%</strong><small class="up">-0.6%</small></article><article class="metric"><span>Trial conversion</span><strong>74.1%</strong><small class="up">+3.9%</small></article></div>
-        </section>
-
-        <section class="view" id="invoices">
-          <div class="metrics"><article class="metric"><span>Open</span><strong>$1,284</strong><small>7 invoices</small></article><article class="metric"><span>Past due</span><strong>$249</strong><small>1 invoice</small></article><article class="metric"><span>Paid this month</span><strong>$6,918</strong><small class="up">+12.1%</small></article></div>
-        </section>
-
-        <section class="view" id="links">
-          <article class="panel pad"><div class="panel-head"><div><h2>Payment links</h2><span>Static frontend representation of hosted checkout links</span></div><button class="primary">+ New link</button></div><div class="link-list"><div><strong>ezpay.example/aura-pro</strong><span>Aura Pro · $149.00</span><b class="badge success">Active</b></div><div><strong>ezpay.example/middos-start</strong><span>Middos Starter · $39/mo</span><b class="badge success">Active</b></div></div></article>
-        </section>
-
-        <section class="view" id="risk">
-          <div class="metrics"><article class="metric"><span>Blocked</span><strong>19</strong><small>$1,431 protected</small></article><article class="metric"><span>Manual review</span><strong>3</strong><small>2 awaiting action</small></article><article class="metric"><span>Rules evaluated</span><strong>100%</strong><small>online traffic</small></article></div>
-          <article class="panel pad section-gap"><h2>Risk rules</h2><div class="rule-list"><div><span><strong>Velocity protection</strong><small>Block repeated attempts across card/device/IP</small></span><i class="toggle on"></i></div><div><span><strong>High-risk scoring</strong><small>Hold transactions above configured threshold</small></span><i class="toggle on"></i></div><div><span><strong>3DS / step-up</strong><small>Require additional authentication on eligible traffic</small></span><i class="toggle on"></i></div><div><span><strong>Allow/deny lists</strong><small>Merchant-managed fingerprints, emails, countries and IPs</small></span><i class="toggle on"></i></div></div></article>
-        </section>
-
-        <section class="view" id="disputes">
-          <div class="metrics"><article class="metric"><span>Needs response</span><strong>2</strong><small>$188 at risk</small></article><article class="metric"><span>Win rate</span><strong>75%</strong><small>demo data</small></article><article class="metric"><span>Disputed volume</span><strong>0.42%</strong><small>of processed volume</small></article></div>
-        </section>
-
-        <section class="view" id="ledger">
-          <div class="notice info"><strong>Immutable ledger model</strong><span>Every movement is represented as balanced debit/credit entries. Payment authorization state is not treated as balance truth; settlement and ledger postings are reconciled independently.</span></div>
-          <article class="panel pad section-gap"><div class="ledger-entries"><div><code>txn_8f2…</code><span>Merchant available</span><strong>+$149.00</strong></div><div><code>txn_8f2…</code><span>Clearing receivable</span><strong>-$149.00</strong></div><div><code>fee_992…</code><span>Processing fees</span><strong>-$4.62</strong></div><div><code>fee_992…</code><span>Platform fee revenue</span><strong>+$4.62</strong></div></div></article>
-        </section>
-
-        <section class="view" id="settlement">
-          <article class="panel pad"><h2>Network & banking layer</h2><p class="body-copy">A real EZPay processor would need commercial access to acquiring, card-network, sponsor-bank and settlement rails. The frontend models this as adapters so the control plane stays independent from any one upstream integration.</p><div class="adapter-grid"><div><strong>Card acquiring</strong><span>Acquirer / acquiring processor adapter</span></div><div><strong>ACH</strong><span>ODFI / sponsor-bank or processor adapter</span></div><div><strong>Wallets</strong><span>Wallet-specific token & merchant validation adapters</span></div><div><strong>Payouts</strong><span>Banking / treasury disbursement adapter</span></div></div></article>
-        </section>
-
-        <section class="view" id="developers">
-          <div class="grid two">
-            <article class="panel pad"><div class="panel-head"><div><h2>EZPay API</h2><span>Provider-independent resource model</span></div><b class="badge success">Designed</b></div><pre><code>POST /v1/payment_intents
-Authorization: Bearer ez_live_...
+        <section class="view" id="view-developers">
+          <div class="two-col">
+            <article class="card panel-pad">
+              <div class="card-head"><div><h2>Sandbox API model</h2><p>EZPay-native resource shape</p></div><span class="pill success">Ready</span></div>
+              <pre class="code-block"><code>POST /v1/payment_intents
 
 {
   "amount": 14900,
   "currency": "usd",
-  "payment_method_types": ["card", "apple_pay"]
-}</code></pre></article>
-            <article class="panel pad"><div class="panel-head"><div><h2>Core objects</h2><span>Stable abstractions for apps integrating with EZPay</span></div></div><div class="object-list"><span>PaymentIntent</span><span>PaymentMethod</span><span>Customer</span><span>Refund</span><span>Dispute</span><span>BalanceTransaction</span><span>Payout</span><span>WebhookEvent</span></div></article>
+  "customer": "cus_...",
+  "price": "price_..."
+}</code></pre>
+            </article>
+            <article class="card panel-pad">
+              <div class="card-head"><div><h2>Objects</h2><p>Stable application-facing abstractions</p></div></div>
+              <div class="object-tags"><span>PaymentIntent</span><span>Payment</span><span>Customer</span><span>Product</span><span>Price</span><span>Subscription</span><span>PaymentPage</span><span>Payout</span><span>WebhookEvent</span></div>
+            </article>
           </div>
+          <article class="card panel-pad gap-top">
+            <div class="card-head"><div><h2>Production rail adapters</h2><p>Needed before EZPay can move real money</p></div></div>
+            <div class="adapter-list">
+              <div><strong>Cards</strong><span>Acquirer / processor / card network integration + PCI-scoped tokenization</span><b class="pill warning">Not connected</b></div>
+              <div><strong>Apple Pay / Google Pay</strong><span>Wallet merchant onboarding + acquiring path</span><b class="pill warning">Not connected</b></div>
+              <div><strong>Amazon Pay / Cash App Pay</strong><span>Direct merchant / processor integration</span><b class="pill warning">Not connected</b></div>
+              <div><strong>ACH</strong><span>Sponsor bank / ODFI or processor access</span><b class="pill warning">Not connected</b></div>
+            </div>
+          </article>
         </section>
 
-        <section class="view" id="keys">
-          <div class="notice warning"><strong>No real keys are present on GitHub Pages.</strong><span>Secret API keys must only exist in a backend secret store. Static Pages deployments are intentionally incapable of issuing or storing production secrets.</span></div>
-          <article class="panel section-gap"><div class="key-row"><span>Publishable key</span><code>ez_test_public_demo_only</code><button>Copy</button></div><div class="key-row"><span>Secret key</span><code>••••••••••••••••••••••••</code><button disabled>Server only</button></div></article>
-        </section>
-
-        <section class="view" id="webhooks">
-          <article class="panel pad"><h2>Webhook event model</h2><div class="event-grid"><span>payment_intent.created</span><span>payment_intent.authorized</span><span>payment_intent.captured</span><span>payment_intent.failed</span><span>refund.created</span><span>dispute.opened</span><span>payout.paid</span><span>payout.failed</span></div></article>
-        </section>
-
-        <section class="view" id="security">
-          <div class="security-grid">
-            <article><b>01</b><h3>Tokenization boundary</h3><p>Raw PAN/CVV should never touch the EZPay dashboard or public web origin. Production collection belongs in a hardened PCI-scoped component or certified vaulting/tokenization environment.</p></article>
-            <article><b>02</b><h3>Encryption</h3><p>TLS in transit, envelope encryption at rest, KMS/HSM-backed key management, strict key rotation and separate environments.</p></article>
-            <article><b>03</b><h3>Authentication</h3><p>Passkeys/MFA for operators, scoped API keys, signed sessions, least privilege, device/session revocation, and immutable audit trails.</p></article>
-            <article><b>04</b><h3>PCI & compliance</h3><p>A real direct card processor must design around PCI DSS, network/acquirer obligations, dispute rules, monitoring, incident response, and applicable payments regulation.</p></article>
-            <article><b>05</b><h3>Fraud controls</h3><p>Velocity rules, fingerprinting, behavioral signals, allow/deny lists, 3DS/SCA, manual review and risk-score policy engines.</p></article>
-            <article><b>06</b><h3>Ledger integrity</h3><p>Append-only double-entry accounting, idempotency, event versioning, reconciliation, invariant checks and durable backup strategy.</p></article>
-          </div>
+        <section class="view" id="view-settings">
+          <article class="card">
+            <div class="settings-head"><h2>Branding</h2><p>Defaults used when you create a payment page.</p></div>
+            <div class="settings-body">
+              <label class="field"><span>Business name</span><input id="settingBusinessName" /></label>
+              <label class="field"><span>Default accent color</span><div class="color-input"><input type="color" id="settingAccentColor" /><input id="settingAccentHex" /></div></label>
+              <label class="field"><span>Support email</span><input id="settingSupportEmail" type="email" /></label>
+              <button class="primary-button" id="saveSettingsButton">Save settings</button>
+            </div>
+          </article>
+          <div class="warning-box gap-top"><strong>Bank connection is unsupported.</strong><span>EZPay can model ACH payment rails, but does not provide persistent consumer online-banking aggregation or store bank-login credentials.</span></div>
         </section>
       </section>
     </main>
   </div>
+
+  <div class="modal-backdrop hidden" id="modalBackdrop">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head"><div><h2 id="modalTitle">Dialog</h2><p id="modalSubtitle"></p></div><button class="modal-close" id="modalClose">×</button></div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <div class="builder hidden" id="pageBuilder">
+    <header class="builder-topbar">
+      <button class="builder-back" id="builderClose">←</button>
+      <div><strong id="builderTitle">Create payment page</strong><span id="builderStatus">Draft</span></div>
+      <div class="builder-spacer"></div>
+      <button class="secondary-button" id="builderPreviewButton">Preview</button>
+      <button class="primary-button" id="builderPublishButton">Publish</button>
+    </header>
+    <div class="builder-layout">
+      <aside class="builder-controls">
+        <div class="builder-section">
+          <h3>Product & pricing</h3>
+          <label class="field"><span>Product</span><select id="builderProduct"></select></label>
+          <label class="field"><span>Price</span><select id="builderPrice"></select></label>
+        </div>
+        <div class="builder-section">
+          <h3>Page content</h3>
+          <label class="field"><span>Page name</span><input id="builderName" placeholder="Aura Pro checkout" /></label>
+          <label class="field"><span>Headline</span><input id="builderHeadline" placeholder="Upgrade to Aura Pro" /></label>
+          <label class="field"><span>Description</span><textarea id="builderDescription" rows="4" placeholder="Unlock every Aura feature."></textarea></label>
+          <label class="field"><span>Button label</span><input id="builderButtonText" placeholder="Subscribe" /></label>
+          <label class="field"><span>Success message</span><textarea id="builderSuccessMessage" rows="3" placeholder="You're all set!"></textarea></label>
+        </div>
+        <div class="builder-section">
+          <h3>Branding</h3>
+          <label class="field"><span>Brand name</span><input id="builderBrand" /></label>
+          <label class="field"><span>Accent</span><div class="color-input"><input type="color" id="builderAccent" /><input id="builderAccentHex" /></div></label>
+        </div>
+        <div class="builder-section">
+          <h3>Checkout options</h3>
+          <label class="check-row"><input type="checkbox" id="builderCollectName" checked /><span><strong>Collect customer name</strong><small>Add name to the customer profile</small></span></label>
+          <label class="check-row"><input type="checkbox" id="builderCollectAddress" /><span><strong>Collect billing address</strong><small>Sandbox field only</small></span></label>
+          <label class="field"><span>Trial days</span><input type="number" min="0" max="365" id="builderTrialDays" value="0" /></label>
+        </div>
+      </aside>
+
+      <main class="builder-preview-wrap">
+        <div class="preview-label">LIVE PREVIEW</div>
+        <div class="checkout-preview" id="builderPreview"></div>
+      </main>
+    </div>
+  </div>
+
+  <div class="checkout-route hidden" id="checkoutRoute">
+    <div class="checkout-route-top"><button id="checkoutBackButton">← EZPay</button><span>Sandbox checkout</span></div>
+    <div id="checkoutRouteContent"></div>
+  </div>
+
+  <div class="toast-stack" id="toastStack"></div>
+
   <script src="./ezpay.js"></script>
 </body>
 </html>

@@ -1,0 +1,3 @@
+EZPay Cloudflare deployment refresh
+Triggered: 2026-10-02
+Purpose: attach production D1 binding after ezpay_db migration

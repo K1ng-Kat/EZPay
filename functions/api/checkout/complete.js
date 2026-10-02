@@ -1,6 +1,7 @@
 import {json,error,readJson,sameOrigin,randomId,now} from "../../_lib/http.js";
 import {randomToken,sha256} from "../../_lib/crypto.js";
 import {audit,emitEvent} from "../../_lib/db.js";
+import {rateLimit} from "../../_lib/rate-limit.js";
 
 const TEST_SUCCESS=new Set(["4242424242424242","5555555555554444"]);
 const TEST_DECLINE="4000000000000002";
@@ -16,6 +17,8 @@ function nextPeriodEnd(start,interval) {
 export async function onRequestPost(context) {
   const {request,env}=context;
   if(!sameOrigin(request)) return error("Invalid origin",403,"invalid_origin");
+  const limited=await rateLimit(request,env,"checkout",60,10*60*1000);
+  if(limited) return limited;
 
   const idem=String(request.headers.get("idempotency-key")||"").trim();
   if(idem) {

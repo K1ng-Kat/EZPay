@@ -1,0 +1,35 @@
+name: Cloudflare Pages CI
+
+on:
+  push:
+    branches: ["cloudflare-pages"]
+  pull_request:
+    branches: ["cloudflare-pages"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Build static Pages assets
+        run: npm run build
+
+      - name: Compile Pages Functions
+        run: npx --yes wrangler@latest pages functions build functions --outfile /tmp/ezpay-worker.js
+
+      - name: Verify output
+        run: |
+          test -f public/index.html
+          test -f public/ezpay-backend.js
+          test -f public/_headers
+          test -s /tmp/ezpay-worker.js

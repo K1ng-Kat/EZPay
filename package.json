@@ -1,27 +1,11 @@
 {
-  "name": "ezpay",
-  "version": "0.1.0",
+  "name": "ezpay-cloudflare",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "typecheck": "tsc --noEmit",
-    "register:domain": "node scripts/register-payment-domain.mjs"
-  },
-  "dependencies": {
-    "@stripe/react-stripe-js": "6.12.0",
-    "@stripe/stripe-js": "9.17.0",
-    "lucide-react": "1.49.0",
-    "next": "16.3.8",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
-    "stripe": "22.6.2"
-  },
-  "devDependencies": {
-    "@types/node": "22.20.5",
-    "@types/react": "19.3.0",
-    "@types/react-dom": "19.3.0",
-    "typescript": "7.0.2"
+    "build": "rm -rf public && mkdir -p public && cp index.html ezpay.css ezpay-core.js ezpay-render.js ezpay-builder.js ezpay.js .nojekyll public/",
+    "pages:dev": "npx wrangler pages dev public",
+    "db:migrate:local": "npx wrangler d1 migrations apply EZPAY_DB --local",
+    "db:migrate:remote": "npx wrangler d1 migrations apply EZPAY_DB --remote"
   }
 }

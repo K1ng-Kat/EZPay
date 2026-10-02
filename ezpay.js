@@ -178,8 +178,40 @@
     const editPage=event.target.closest("[data-edit-page]");if(editPage){EZ.openBuilder(editPage.dataset.editPage);return;}
     const openPage=event.target.closest("[data-open-page]");if(openPage){EZ.openCheckout(EZ.page(openPage.dataset.openPage));return;}
     const copyPage=event.target.closest("[data-copy-page]");if(copyPage){const page=EZ.page(copyPage.dataset.copyPage);if(page)EZ.copyText(EZ.pageLink(page));}
+    const cancelSub=event.target.closest("[data-cancel-sub]");
+    if(cancelSub){
+      (async()=>{try{
+        await EZ.api("/api/subscriptions/"+encodeURIComponent(cancelSub.dataset.cancelSub)+"/cancel",{method:"POST",body:JSON.stringify({})});
+        await EZ.loadRemote();EZ.renderAll();EZ.toast("Subscription canceled");
+      }catch(error){EZ.toast("Cancel failed",error.message);}})();
+      return;
+    }
+    const revokeKey=event.target.closest("[data-revoke-key]");
+    if(revokeKey){
+      (async()=>{try{
+        await EZ.api("/api/api-keys/"+encodeURIComponent(revokeKey.dataset.revokeKey),{method:"DELETE"});
+        await EZ.renderDeveloperResources();EZ.toast("API key revoked");
+      }catch(error){EZ.toast("Revoke failed",error.message);}})();
+      return;
+    }
+    const deleteWebhook=event.target.closest("[data-delete-webhook]");
+    if(deleteWebhook){
+      (async()=>{try{
+        await EZ.api("/api/webhooks/"+encodeURIComponent(deleteWebhook.dataset.deleteWebhook),{method:"DELETE"});
+        await EZ.renderDeveloperResources();EZ.toast("Webhook removed");
+      }catch(error){EZ.toast("Delete failed",error.message);}})();
+      return;
+    }
   });
 
+  EZ.$("logoutButton").onclick=async()=>{
+    try{await EZ.api("/api/auth/logout",{method:"POST",body:JSON.stringify({})});}catch{}
+    EZ.authenticated=false;
+    EZ.toast("Signed out");
+    EZ.showLogin();
+  };
+  EZ.$("createApiKeyButton").onclick=()=>EZ.createApiKey();
+  EZ.$("addWebhookButton").onclick=()=>EZ.createWebhook();
   EZ.$("mobileMenu").onclick=()=>EZ.$("sidebar").classList.toggle("open");
   EZ.$("refreshButton").onclick=async()=>{try{if(EZ.authenticated)await EZ.loadRemote();EZ.renderAll();EZ.toast("EZPay refreshed");}catch(error){EZ.toast("Refresh failed",error.message);}};
   EZ.$("modalClose").onclick=EZ.closeModal;

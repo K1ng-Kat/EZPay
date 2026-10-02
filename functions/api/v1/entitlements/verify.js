@@ -1,6 +1,7 @@
 import {json,error,readJson,randomId,now} from "../../../_lib/http.js";
 import {sha256} from "../../../_lib/crypto.js";
 import {emitEvent} from "../../../_lib/db.js";
+import {rateLimit} from "../../../_lib/rate-limit.js";
 
 function nextPeriodEnd(start,interval) {
   const d=new Date(start);
@@ -12,6 +13,9 @@ function nextPeriodEnd(start,interval) {
 
 export async function onRequestPost(context) {
   const {request,env}=context;
+  const limited=await rateLimit(request,env,"entitlement-verify",120,10*60*1000);
+  if(limited) return limited;
+
   let body;
   try { body=await readJson(request); }
   catch { return error("Invalid JSON request",400); }

@@ -118,7 +118,7 @@
   EZ.renderProducts=()=>{
     EZ.$("productsEmpty").classList.toggle("hidden",EZ.state.products.length>0);
     EZ.$("productGrid").innerHTML=EZ.state.products.map((product)=>{
-      const initials=product.name.split(/s+/).map((p)=>p[0]).join("").slice(0,2).toUpperCase();
+      const initials=product.name.split(/\\s+/).map((p)=>p[0]).join("").slice(0,2).toUpperCase();
       const prices=product.prices.filter((p)=>p.active).map((p)=>'<div class="price-row"><div><strong>'+EZ.escape(p.nickname)+'</strong><span>'+EZ.escape(p.id)+'</span></div><strong>'+EZ.money(p.amount,p.currency)+' <span>'+EZ.escape(EZ.interval(p))+'</span></strong></div>').join("");
       return '<article class="product-card"><div class="product-icon">'+EZ.escape(initials)+'</div><h3>'+EZ.escape(product.name)+'</h3><p>'+EZ.escape(product.description||"No description")+'</p><div class="price-stack">'+prices+'</div><div class="card-actions"><button data-edit-product="'+product.id+'">Edit</button><button class="primary-mini" data-product-page="'+product.id+'">Create payment page</button></div></article>';
     }).join("");
@@ -133,8 +133,9 @@
     EZ.$("subscriptionCount").textContent=EZ.state.subscriptions.length+" total";
     EZ.$("subscriptionsBody").innerHTML=rows.length?rows.map((s)=>{
       const product=EZ.product(s.productId),price=EZ.price(product,s.priceId),customer=EZ.customer(s.customerId);
-      return '<tr><td><strong>'+EZ.escape(customer?.name||s.customerEmail)+'</strong><div class="muted-cell">'+EZ.escape(s.customerEmail)+'</div></td><td>'+EZ.escape(product?.name||"Deleted product")+'</td><td class="amount-cell">'+(price?EZ.money(price.amount,price.currency)+" "+EZ.interval(price):"—")+'</td><td>'+EZ.statusPill(s.status)+'</td><td>'+EZ.shortDate(s.started)+'</td><td>'+(s.currentPeriodEnd?EZ.shortDate(s.currentPeriodEnd):"—")+'</td></tr>';
-    }).join(""):'<tr><td colspan="6" class="muted-cell">No subscriptions yet. Complete an Aura sandbox checkout to create one.</td></tr>';
+      const action=["active","trialing"].includes(s.status)?'<button class="small-button" data-cancel-sub="'+EZ.escape(s.id)+'">Cancel</button>':"";
+      return '<tr><td><strong>'+EZ.escape(customer?.name||s.customerEmail)+'</strong><div class="muted-cell">'+EZ.escape(s.customerEmail)+'</div></td><td>'+EZ.escape(product?.name||"Deleted product")+'</td><td class="amount-cell">'+(price?EZ.money(price.amount,price.currency)+" "+EZ.interval(price):"—")+'</td><td>'+EZ.statusPill(s.status)+'</td><td>'+EZ.shortDate(s.started)+'</td><td>'+(s.currentPeriodEnd?EZ.shortDate(s.currentPeriodEnd):"—")+'</td><td>'+action+'</td></tr>';
+    }).join(""):'<tr><td colspan="7" class="muted-cell">No subscriptions yet. Complete an Aura sandbox checkout to create one.</td></tr>';
   };
 
   EZ.pageLink=(page)=>location.origin+location.pathname+"#/checkout/"+encodeURIComponent(page.slug);

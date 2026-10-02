@@ -40,7 +40,7 @@ export async function onRequestPost(context) {
       ).bind(newEnd,timestamp,sub.id)
     ]);
     renewed++;
-    await emitEvent(env,"invoice.payment_succeeded",{subscriptionId:sub.id,paymentId,currentPeriodEnd:newEnd},context.waitUntil);
+    await emitEvent(env,"invoice.payment_succeeded",{subscriptionId:sub.id,paymentId,currentPeriodEnd:newEnd},(p)=>context.waitUntil(p));
   }
 
   return json({ok:true,renewed});

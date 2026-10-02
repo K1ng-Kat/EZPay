@@ -1,0 +1,5 @@
+EZPAY_OWNER_EMAIL=owner@example.com
+EZPAY_OWNER_PASSWORD=use-a-long-random-password
+EZPAY_SESSION_HOURS=12
+EZPAY_WEBHOOK_SIGNING_SECRET=replace-with-random-secret
+EZPAY_INTERNAL_JOB_SECRET=replace-with-random-secret

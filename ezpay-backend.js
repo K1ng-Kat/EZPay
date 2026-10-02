@@ -100,6 +100,56 @@
     };
   };
 
+  EZ.renderDeveloperResources=async()=>{
+    if(!EZ.authenticated)return;
+    try{
+      const [keys,hooks]=await Promise.all([EZ.api("/api/api-keys"),EZ.api("/api/webhooks")]);
+      const keyBox=EZ.$("apiKeysList");
+      const hookBox=EZ.$("webhookList");
+      if(keyBox) keyBox.innerHTML=keys.apiKeys.length?keys.apiKeys.map(k=>
+        '<div class="developer-row"><div><strong>'+EZ.escape(k.name)+'</strong><small class="mono">'+EZ.escape(k.prefix)+'… · '+EZ.escape(k.scopes.join(","))+'</small></div><button data-revoke-key="'+EZ.escape(k.id)+'">Revoke</button></div>'
+      ).join(""):'<div class="muted-cell">No API keys yet.</div>';
+      if(hookBox) hookBox.innerHTML=hooks.endpoints.length?hooks.endpoints.map(h=>
+        '<div class="developer-row"><div><strong>'+EZ.escape(h.url)+'</strong><small>'+ (h.active?"Active":"Disabled") +'</small></div><button data-delete-webhook="'+EZ.escape(h.id)+'">Delete</button></div>'
+      ).join(""):'<div class="muted-cell">No webhook endpoints yet.</div>';
+    }catch(error){
+      EZ.toast("Developer data failed",error.message);
+    }
+  };
+
+  EZ.createApiKey=()=>{
+    EZ.openModal("Create API key","The raw key is shown once. Store it somewhere secure.",
+      '<form id="createKeyForm"><label class="field"><span>Name</span><input name="name" required placeholder="Aura backend" /></label><label class="field"><span>Scopes</span><input name="scopes" value="*" placeholder="*" /></label><div class="form-actions"><button class="secondary-button" type="button" id="cancelKeyCreate">Cancel</button><button class="primary-button" type="submit">Create key</button></div></form>');
+    EZ.$("cancelKeyCreate").onclick=EZ.closeModal;
+    EZ.$("createKeyForm").onsubmit=async(e)=>{
+      e.preventDefault();
+      const fd=new FormData(e.currentTarget);
+      try{
+        const result=await EZ.api("/api/api-keys",{method:"POST",body:JSON.stringify({
+          name:String(fd.get("name")||"API key"),
+          scopes:String(fd.get("scopes")||"*").split(",").map(s=>s.trim()).filter(Boolean)
+        })});
+        EZ.$("modalBody").innerHTML='<div class="test-banner"><strong>Copy this key now</strong><br><code>'+EZ.escape(result.key)+'</code></div><div class="form-actions"><button class="primary-button" id="copyNewKey">Copy key</button></div>';
+        EZ.$("copyNewKey").onclick=()=>EZ.copyText(result.key);
+        EZ.renderDeveloperResources();
+      }catch(error){EZ.toast("API key creation failed",error.message);}
+    };
+  };
+
+  EZ.createWebhook=()=>{
+    EZ.openModal("Add webhook endpoint","EZPay signs each delivery with your webhook signing secret.",
+      '<form id="createWebhookForm"><label class="field"><span>HTTPS endpoint</span><input name="url" type="url" required placeholder="https://example.com/ezpay/webhook" /></label><div class="form-actions"><button class="secondary-button" type="button" id="cancelWebhookCreate">Cancel</button><button class="primary-button" type="submit">Add endpoint</button></div></form>');
+    EZ.$("cancelWebhookCreate").onclick=EZ.closeModal;
+    EZ.$("createWebhookForm").onsubmit=async(e)=>{
+      e.preventDefault();
+      const fd=new FormData(e.currentTarget);
+      try{
+        await EZ.api("/api/webhooks",{method:"POST",body:JSON.stringify({url:String(fd.get("url")||"")})});
+        EZ.closeModal();EZ.renderDeveloperResources();EZ.toast("Webhook endpoint added");
+      }catch(error){EZ.toast("Webhook creation failed",error.message);}
+    };
+  };
+
   EZ.bootstrap=async()=>{
     if(location.hash.startsWith("#/checkout/"))return;
     try{

@@ -6,6 +6,7 @@
     "build": "rm -rf public && mkdir -p public && cp index.html ezpay.css ezpay-core.js ezpay-render.js ezpay-builder.js ezpay-backend.js ezpay.js .nojekyll _headers public/",
     "pages:dev": "npx wrangler pages dev public",
     "db:migrate:local": "npx wrangler d1 migrations apply EZPAY_DB --local",
-    "db:migrate:remote": "npx wrangler d1 migrations apply EZPAY_DB --remote"
+    "db:migrate:remote": "npx wrangler d1 migrations apply EZPAY_DB --remote",
+    "deploy:cloudflare": "bash scripts/bootstrap-cloudflare.sh"
   }
 }

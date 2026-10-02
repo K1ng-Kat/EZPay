@@ -53,3 +53,13 @@ Express Checkout can surface eligible express methods such as Apple Pay, Google 
 Sensitive payment credentials are collected by provider-hosted Elements and are not posted to EZPay. Fulfillment must rely on verified webhook state, not only the browser success page.
 
 For production, also use infrastructure-level rate limiting/WAF rules, persistent database-backed event/audit storage, secret rotation, backups, and MFA/passkeys for the owner account.
+
+## Wallet domain registration
+
+After deploying your checkout domain, register its hostname with Stripe so eligible web wallets can appear:
+
+```bash
+STRIPE_SECRET_KEY=sk_... npm run register:domain -- pay.example.com
+```
+
+For this Stripe Elements web integration, EZPay does not need a separate Apple API key in code. The deployed domain must be registered with Stripe for supported web payment methods such as Apple Pay, Google Pay, and Link.

@@ -1,22 +1,18 @@
 {
   "name": "ezpay",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "typecheck": "tsc --noEmit",
-    "register:domain": "node scripts/register-payment-domain.mjs"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@stripe/react-stripe-js": "6.12.0",
-    "@stripe/stripe-js": "9.17.0",
     "lucide-react": "1.49.0",
     "next": "16.3.8",
     "react": "19.3.0",
-    "react-dom": "19.3.0",
-    "stripe": "22.6.2"
+    "react-dom": "19.3.0"
   },
   "devDependencies": {
     "@types/node": "22.20.5",

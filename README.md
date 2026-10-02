@@ -1,1 +1,1 @@
-# ESPay
+# EZPay

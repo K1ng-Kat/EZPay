@@ -1,6 +1,6 @@
-import {json,error,sameOrigin,now} from "../../../../_lib/http.js";
-import {requireOwner} from "../../../../_lib/auth.js";
-import {audit,emitEvent} from "../../../../_lib/db.js";
+import {json,error,sameOrigin,now} from "../../../_lib/http.js";
+import {requireOwner} from "../../../_lib/auth.js";
+import {audit,emitEvent} from "../../../_lib/db.js";
 
 export async function onRequestPost(context) {
   const {request,env,params}=context;
@@ -18,6 +18,6 @@ export async function onRequestPost(context) {
     "UPDATE subscriptions SET status='canceled',canceled_at=?,updated_at=? WHERE id=?"
   ).bind(timestamp,timestamp,id).run();
   await audit(env,auth.session.email,"subscription.cancel","subscription",id,{});
-  await emitEvent(env,"subscription.canceled",{subscriptionId:id},context.waitUntil);
+  await emitEvent(env,"subscription.canceled",{subscriptionId:id},(p)=>context.waitUntil(p));
   return json({ok:true,status:"canceled",canceledAt:timestamp});
 }

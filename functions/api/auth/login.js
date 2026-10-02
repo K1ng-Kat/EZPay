@@ -1,10 +1,13 @@
 import {json,error,readJson,sameOrigin,now} from "../../_lib/http.js";
 import {createSession,sessionCookie,verifyOwnerPassword} from "../../_lib/auth.js";
+import {rateLimit} from "../../_lib/rate-limit.js";
 
 export async function onRequestPost(context) {
   const {request,env}=context;
   if(!sameOrigin(request)) return error("Invalid origin",403,"invalid_origin");
   if(!env.DB) return error("D1 binding DB is not configured",503,"database_unavailable");
+  const limited=await rateLimit(request,env,"owner-login",10,15*60*1000);
+  if(limited) return limited;
 
   let body;
   try { body=await readJson(request); }

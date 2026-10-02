@@ -1,7 +1,8 @@
 (() => {
   "use strict";
   const EZ=window.EZ;
-  EZ.editingPageId=null;\n  EZ.builderLogoData="";
+  EZ.editingPageId=null;
+  EZ.builderLogoData="";
 
   EZ.openModal=(title,subtitle,html)=>{
     EZ.$("modalTitle").textContent=title;
@@ -75,7 +76,8 @@
     priceId:EZ.$("builderPrice").value,
     headline:EZ.$("builderHeadline").value.trim()||"Complete your purchase",
     description:EZ.$("builderDescription").value.trim(),
-    brand:EZ.$("builderBrand").value.trim()||EZ.state.settings.businessName,\n    logoData:EZ.builderLogoData||"",
+    brand:EZ.$("builderBrand").value.trim()||EZ.state.settings.businessName,
+    logoData:EZ.builderLogoData||"",
     accent:EZ.$("builderAccent").value||"#635bff",
     buttonText:EZ.$("builderButtonText").value.trim()||"Subscribe",
     successMessage:EZ.$("builderSuccessMessage").value.trim()||"You're all set.",
@@ -119,7 +121,9 @@
     EZ.$("builderDescription").value=page?.description||product?.description||"";
     EZ.$("builderButtonText").value=page?.buttonText||"Subscribe";
     EZ.$("builderSuccessMessage").value=page?.successMessage||"You're all set. Your subscription is active.";
-    EZ.$("builderBrand").value=page?.brand||(product?.name.startsWith("Aura")?"Aura":EZ.state.settings.businessName);\n    EZ.builderLogoData=page?.logoData||"";\n    EZ.$("builderLogo").value="";
+    EZ.$("builderBrand").value=page?.brand||(product?.name.startsWith("Aura")?"Aura":EZ.state.settings.businessName);
+    EZ.builderLogoData=page?.logoData||"";
+    EZ.$("builderLogo").value="";
     EZ.$("builderAccent").value=page?.accent||EZ.state.settings.accent;
     EZ.$("builderAccentHex").value=page?.accent||EZ.state.settings.accent;
     EZ.$("builderCollectName").checked=page?.collectName??true;

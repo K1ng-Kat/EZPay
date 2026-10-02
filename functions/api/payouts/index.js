@@ -47,6 +47,6 @@ export async function onRequestPost(context) {
   ).bind(id,requested,"usd","paid",destination,created).run();
 
   await audit(env,auth.session.email,"payout.create","payout",id,{amount:requested});
-  await emitEvent(env,"payout.paid",{id,amount:requested,currency:"usd",destination},context.waitUntil);
+  await emitEvent(env,"payout.paid",{id,amount:requested,currency:"usd",destination},(p)=>context.waitUntil(p));
   return json({ok:true,payout:{id,amount:requested,currency:"usd",status:"paid",destination,created},available:available-requested},201);
 }

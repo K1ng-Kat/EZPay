@@ -45,7 +45,7 @@ export async function onRequestPost(context) {
         "UPDATE subscriptions SET status='active',current_period_end=?,updated_at=? WHERE id=?"
       ).bind(newEnd,current,sub.id)
     ]);
-    await emitEvent(env,"invoice.payment_succeeded",{subscriptionId:sub.id,paymentId,currentPeriodEnd:newEnd},context.waitUntil);
+    await emitEvent(env,"invoice.payment_succeeded",{subscriptionId:sub.id,paymentId,currentPeriodEnd:newEnd},(p)=>context.waitUntil(p));
     sub={...sub,status:"active",current_period_end:newEnd};
   }
 

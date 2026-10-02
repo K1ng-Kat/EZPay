@@ -66,7 +66,7 @@
         </div>
         <button class="top-icon" id="refreshButton" title="Refresh">↻</button>
         <button class="top-icon" title="Notifications">◔</button>
-        <div class="user-avatar">MK</div>
+        <button class="user-avatar" id="logoutButton" title="Sign out">MK</button>
       </header>
 
       <section class="workspace">
@@ -147,7 +147,7 @@
           <div class="stats-grid" id="subscriptionStats"></div>
           <article class="card gap-top">
             <div class="toolbar"><div class="toolbar-title"><h2>Subscriptions</h2><span id="subscriptionCount"></span></div><div class="toolbar-spacer"></div><input class="table-search" id="subscriptionSearch" placeholder="Search subscriptions" /></div>
-            <div class="table-wrap"><table><thead><tr><th>Customer</th><th>Product</th><th>Price</th><th>Status</th><th>Started</th><th>Next renewal</th></tr></thead><tbody id="subscriptionsBody"></tbody></table></div>
+            <div class="table-wrap"><table><thead><tr><th>Customer</th><th>Product</th><th>Price</th><th>Status</th><th>Started</th><th>Next renewal</th><th></th></tr></thead><tbody id="subscriptionsBody"></tbody></table></div>
           </article>
         </section>
 
@@ -190,6 +190,16 @@
             <article class="card panel-pad">
               <div class="card-head"><div><h2>Objects</h2><p>Stable application-facing abstractions</p></div></div>
               <div class="object-tags"><span>PaymentIntent</span><span>Payment</span><span>Customer</span><span>Product</span><span>Price</span><span>Subscription</span><span>PaymentPage</span><span>Payout</span><span>WebhookEvent</span></div>
+            </article>
+          </div>
+          <div class="two-col gap-top">
+            <article class="card panel-pad">
+              <div class="card-head"><div><h2>API keys</h2><p>Server-to-server credentials</p></div><button class="small-button" id="createApiKeyButton">+ Create</button></div>
+              <div class="developer-list" id="apiKeysList"><span class="muted-cell">Loading…</span></div>
+            </article>
+            <article class="card panel-pad">
+              <div class="card-head"><div><h2>Webhook endpoints</h2><p>Signed event delivery</p></div><button class="small-button" id="addWebhookButton">+ Add</button></div>
+              <div class="developer-list" id="webhookList"><span class="muted-cell">Loading…</span></div>
             </article>
           </div>
           <article class="card panel-pad gap-top">

@@ -45,79 +45,65 @@
       if(p)EZ.$("livePrice").innerHTML=EZ.money(p.amount,p.currency)+" <small>"+EZ.escape(EZ.interval(p))+"</small>";
     });
     document.querySelector('#liveCheckoutForm input[name="card"]')?.addEventListener("input",(e)=>{
-      const digits=e.target.value.replace(/D/g,"").slice(0,16);
-      e.target.value=digits.replace(/(d{4})(?=d)/g,"$1 ");
+      const digits=e.target.value.replace(/\\D/g,"").slice(0,16);
+      e.target.value=digits.replace(/(\\d{4})(?=\\d)/g,"$1 ");
     });
     EZ.$("liveCheckoutForm").onsubmit=(event)=>EZ.completeCheckout(event,page,product);
   };
 
-  EZ.completeCheckout=(event,page,product)=>{
+  EZ.completeCheckout=async(event,page,product)=>{
     event.preventDefault();
     const form=new FormData(event.currentTarget);
-    const card=String(form.get("card")||"").replace(/D/g,"");
-    const email=String(form.get("email")||"").trim().toLowerCase();
-    const name=String(form.get("name")||form.get("cardName")||"Customer").trim();
     const priceId=String(form.get("priceId")||page.priceId);
-    const price=EZ.price(product,priceId);
     const error=EZ.$("checkoutError");
     error.classList.add("hidden");
-    if(!price){error.textContent="That price is no longer available.";error.classList.remove("hidden");return;}
 
-    const allowed=["4242424242424242","5555555555554444","4000000000000002"];
-    if(!allowed.includes(card)){
-      error.textContent="Sandbox safety rule: only the listed EZPay test card numbers are accepted. Do not enter a real card.";
-      error.classList.remove("hidden");return;
-    }
-    if(card==="4000000000000002"){
-      EZ.state.payments.push({id:EZ.uid("pay"),amount:price.amount,currency:price.currency,status:"failed",customerId:null,customerEmail:email,productId:product.id,priceId:price.id,description:product.name+" · "+price.nickname,method:"Test card •••• 0002",created:Date.now()});
-      EZ.save();EZ.renderAll();error.textContent="Your test card was declined. Use 4242 4242 4242 4242 for success.";error.classList.remove("hidden");return;
-    }
+    try{
+      const result=await EZ.api("/api/checkout/complete",{
+        method:"POST",
+        headers:{"idempotency-key":crypto.randomUUID()},
+        body:JSON.stringify({
+          pageSlug:page.slug,
+          priceId,
+          name:String(form.get("name")||form.get("cardName")||"Customer").trim(),
+          email:String(form.get("email")||"").trim().toLowerCase(),
+          address:String(form.get("address")||"").trim(),
+          card:String(form.get("card")||"").replace(/\\D/g,"")
+        })
+      });
 
-    let customer=EZ.state.customers.find((c)=>c.email.toLowerCase()===email);
-    if(!customer){customer={id:EZ.uid("cus"),name,email,created:Date.now()};EZ.state.customers.push(customer);}
-    else if(name)customer.name=name;
+      if(EZ.authenticated){
+        try{await EZ.loadRemote();EZ.renderAll();}catch{}
+      }
 
-    const payment={id:EZ.uid("pay"),amount:price.amount,currency:price.currency,status:"succeeded",customerId:customer.id,customerEmail:email,productId:product.id,priceId:price.id,description:product.name+" · "+price.nickname,method:"Test card •••• "+card.slice(-4),created:Date.now()};
-    EZ.state.payments.push(payment);
+      const entitlementBlock=result.entitlementToken
+        ? '<div class="test-banner" style="text-align:left"><strong>Aura entitlement token</strong><br><code id="entitlementTokenValue">'+EZ.escape(result.entitlementToken)+'</code><br><span>Copy this into Aura while testing. Production Aura can verify it through EZPay.</span></div><button class="secondary-button" id="copyEntitlementButton">Copy entitlement token</button>'
+        : "";
 
-    let subscription=null;
-    if(price.interval!=="one_time"){
-      subscription=EZ.state.subscriptions.find((s)=>s.customerId===customer.id&&s.productId===product.id&&["active","trialing"].includes(s.status));
-      if(subscription){
-        subscription.priceId=price.id;
-        subscription.status=page.trialDays>0?"trialing":"active";
-        subscription.currentPeriodEnd=page.trialDays>0?Date.now()+page.trialDays*86400000:EZ.nextRenewal(Date.now(),price.interval);
-      }else{
-        subscription={id:EZ.uid("sub"),customerId:customer.id,customerEmail:email,productId:product.id,priceId:price.id,status:page.trialDays>0?"trialing":"active",started:Date.now(),currentPeriodEnd:page.trialDays>0?Date.now()+page.trialDays*86400000:EZ.nextRenewal(Date.now(),price.interval),paymentPageId:page.id};
-        EZ.state.subscriptions.push(subscription);
+      EZ.$("checkoutRouteContent").innerHTML=
+        '<div class="live-checkout"><div class="checkout-success-view"><div class="success-check">✓</div><h2>'+EZ.escape(result.successMessage||page.successMessage||"Payment successful")+'</h2><p>'+
+        (result.subscription
+          ? 'EZPay created payment '+EZ.escape(result.payment.id)+' and subscription '+EZ.escape(result.subscription.id)+'.'
+          : 'EZPay created payment '+EZ.escape(result.payment.id)+'.')+
+        '</p>'+entitlementBlock+'<button class="primary-button" id="successDashboardButton">View in EZPay</button></div></div>';
+
+      EZ.$("copyEntitlementButton")?.addEventListener("click",()=>EZ.copyText(result.entitlementToken));
+      EZ.$("successDashboardButton").onclick=()=>{
+        history.replaceState(null,"",location.pathname+"#/subscriptions");
+        EZ.$("checkoutRoute").classList.add("hidden");
+        EZ.setView(result.subscription?"subscriptions":"payments");
+      };
+    }catch(apiError){
+      const message=apiError?.data?.error?.message||apiError.message||"Payment failed";
+      error.textContent=message;
+      error.classList.remove("hidden");
+      if(EZ.authenticated){
+        try{await EZ.loadRemote();EZ.renderAll();}catch{}
       }
     }
-
-    EZ.save();EZ.renderAll();
-    EZ.$("checkoutRouteContent").innerHTML=
-      '<div class="live-checkout"><div class="checkout-success-view"><div class="success-check">✓</div><h2>'+EZ.escape(page.successMessage||"Payment successful")+'</h2><p>'+
-      (price.interval==="one_time"?"A successful sandbox payment was created for "+EZ.escape(email)+".":"EZPay created customer "+EZ.escape(customer.id)+", payment "+EZ.escape(payment.id)+", and subscription "+EZ.escape(subscription?.id||"")+".")+
-      '</p><button class="primary-button" id="successDashboardButton">View in EZPay</button></div></div>';
-    EZ.$("successDashboardButton").onclick=()=>{
-      history.replaceState(null,"",location.pathname+"#/subscriptions");
-      EZ.$("checkoutRoute").classList.add("hidden");
-      EZ.setView(price.interval==="one_time"?"payments":"subscriptions");
-    };
   };
 
-  EZ.handleRoute=()=>{
-    const hash=location.hash||"";
-    if(hash.startsWith("#/checkout/")){
-      const page=EZ.pageSlug(decodeURIComponent(hash.slice("#/checkout/".length)));
-      EZ.$("checkoutRoute").classList.remove("hidden");
-      if(page)EZ.renderCheckout(page);
-      else EZ.$("checkoutRouteContent").innerHTML='<article class="card panel-pad"><h2>Payment page not found</h2><p class="muted-cell">This page may be unpublished or deleted.</p></article>';
-      return;
-    }
-    EZ.$("checkoutRoute").classList.add("hidden");
-    if(hash.startsWith("#/"))EZ.setView(hash.slice(2));
-  };
-
+  EZ.handleRoute=async()=>{
   EZ.exportCsv=(kind)=>{
     let rows=[];
     if(kind==="payments")rows=[["id","amount","currency","status","customer_email","description","method","created"],...EZ.state.payments.map((p)=>[p.id,p.amount,p.currency,p.status,p.customerEmail,p.description,p.method,new Date(p.created).toISOString()])];
@@ -129,11 +115,15 @@
     EZ.toast("CSV exported",kind+".csv");
   };
 
-  EZ.createPayout=()=>{
-    const m=EZ.metrics();
-    if(m.available<=0){EZ.toast("No available balance");return;}
-    EZ.state.payouts.push({id:EZ.uid("po"),amount:m.available,currency:"usd",status:"paid",destination:"Sandbox balance",created:Date.now()});
-    EZ.save();EZ.renderAll();EZ.toast("Sandbox payout created",EZ.money(m.available));
+  EZ.createPayout=async()=>{
+    try{
+      const result=await EZ.api("/api/payouts",{method:"POST",body:JSON.stringify({})});
+      await EZ.loadRemote();
+      EZ.renderAll();
+      EZ.toast("Sandbox payout created",EZ.money(result.payout.amount));
+    }catch(error){
+      EZ.toast("Payout failed",error.message);
+    }
   };
 
   EZ.globalSearch=(query)=>{
@@ -169,7 +159,7 @@
   });
 
   EZ.$("mobileMenu").onclick=()=>EZ.$("sidebar").classList.toggle("open");
-  EZ.$("refreshButton").onclick=()=>{EZ.renderAll();EZ.toast("EZPay refreshed");};
+  EZ.$("refreshButton").onclick=async()=>{try{if(EZ.authenticated)await EZ.loadRemote();EZ.renderAll();EZ.toast("EZPay refreshed");}catch(error){EZ.toast("Refresh failed",error.message);}};
   EZ.$("modalClose").onclick=EZ.closeModal;
   EZ.$("modalBackdrop").onclick=(e)=>{if(e.target===EZ.$("modalBackdrop"))EZ.closeModal();};
   EZ.$("paymentSearch").oninput=EZ.renderPayments;
@@ -197,7 +187,7 @@
     EZ.openModal("Reset sandbox data?","This restores the seeded Aura product and checkout.",
       '<p style="font-size:9px;color:#667085;line-height:1.6">This clears the sandbox records stored by EZPay in this browser.</p><div class="form-actions"><button class="secondary-button" id="resetCancel">Cancel</button><button class="primary-button" id="resetConfirm">Reset sandbox</button></div>');
     EZ.$("resetCancel").onclick=EZ.closeModal;
-    EZ.$("resetConfirm").onclick=()=>{EZ.state=EZ.defaultState();EZ.save();EZ.closeModal();EZ.renderAll();EZ.toast("Sandbox reset");};
+    EZ.$("resetConfirm").onclick=async()=>{try{if(EZ.authenticated){await EZ.api("/api/admin/reset",{method:"POST",body:JSON.stringify({})});await EZ.loadRemote();}else{EZ.state=EZ.defaultState();EZ._localSave();}EZ.closeModal();EZ.renderAll();EZ.toast("Sandbox reset");}catch(error){EZ.toast("Reset failed",error.message);}};
   };
 
   EZ.$("builderClose").onclick=EZ.closeBuilder;

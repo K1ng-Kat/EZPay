@@ -38,7 +38,7 @@ Bind it to the Pages project using variable name:
 Then apply the migrations in order:
 
 `migrations/0001_init.sql`
-`migrations/0002_api_keys.sql`
+`migrations/0002_api_keys.sql`\n`migrations/0003_rate_limits.sql`
 
 With Wrangler authenticated, the equivalent command is:
 
@@ -116,3 +116,21 @@ If you later allow one Cloudflare Worker alongside Pages, that Worker can invoke
 The backend/database/subscription platform is real. The bundled card flow remains sandbox-only and deliberately rejects real card numbers.
 
 Actual Visa/Mastercard/Amex, Apple Pay, Google Pay, Amazon Pay, Cash App Pay, PayPal, ACH and other money-moving rails require the appropriate acquiring, sponsor-bank, wallet, processor, network, PCI and merchant credentials. Those credentials are not present in this repository.
+
+
+## One-command bootstrap
+
+If Cloudflare credentials are available in the shell, EZPay can create/find D1, generate the binding config, upload secrets, apply migrations, create the Pages project, build, and deploy:
+
+```bash
+export CLOUDFLARE_API_TOKEN=...
+export CLOUDFLARE_ACCOUNT_ID=...
+export EZPAY_OWNER_EMAIL=...
+export EZPAY_OWNER_PASSWORD=...
+export EZPAY_WEBHOOK_SIGNING_SECRET=...
+export EZPAY_INTERNAL_JOB_SECRET=...
+
+npm run deploy:cloudflare
+```
+
+The script is `scripts/bootstrap-cloudflare.sh`.

@@ -123,7 +123,8 @@
     if(kind==="payments")rows=[["id","amount","currency","status","customer_email","description","method","created"],...EZ.state.payments.map((p)=>[p.id,p.amount,p.currency,p.status,p.customerEmail,p.description,p.method,new Date(p.created).toISOString()])];
     if(kind==="customers")rows=[["id","name","email","created"],...EZ.state.customers.map((c)=>[c.id,c.name,c.email,new Date(c.created).toISOString()])];
     if(kind==="subscriptions")rows=[["id","customer_email","product_id","price_id","status","started","current_period_end"],...EZ.state.subscriptions.map((s)=>[s.id,s.customerEmail,s.productId,s.priceId,s.status,new Date(s.started).toISOString(),new Date(s.currentPeriodEnd).toISOString()])];
-    const csv=rows.map((row)=>row.map((cell)=>'"'+String(cell??"").replaceAll('"','""')+'"').join(",")).join("\n");
+    const csv=rows.map((row)=>row.map((cell)=>'"'+String(cell??"").replaceAll('"','""')+'"').join(",")).join("
+");
     const url=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
     const a=document.createElement("a");a.href=url;a.download="ezpay-"+kind+".csv";a.click();URL.revokeObjectURL(url);
     EZ.toast("CSV exported",kind+".csv");
@@ -206,7 +207,16 @@
     const page=EZ.editingPageId?EZ.page(EZ.editingPageId):null;
     if(page)EZ.openCheckout(page);else EZ.toast("Publish first","Publishing creates a shareable checkout URL.");
   };
-  EZ.$("builderLogo").addEventListener("change",(event)=>{\n    const file=event.target.files?.[0];\n    if(!file)return;\n    if(file.size>400*1024){EZ.toast("Logo is too large","Use an image under 400 KB.");event.target.value="";return;}\n    const reader=new FileReader();\n    reader.onload=()=>{EZ.builderLogoData=String(reader.result||"");EZ.updatePreview();EZ.toast("Logo added");};\n    reader.readAsDataURL(file);\n  });\n\n  EZ.$("builderProduct").onchange=()=>{
+  EZ.$("builderLogo").addEventListener("change",(event)=>{
+    const file=event.target.files?.[0];
+    if(!file)return;
+    if(file.size>400*1024){EZ.toast("Logo is too large","Use an image under 400 KB.");event.target.value="";return;}
+    const reader=new FileReader();
+    reader.onload=()=>{EZ.builderLogoData=String(reader.result||"");EZ.updatePreview();EZ.toast("Logo added");};
+    reader.readAsDataURL(file);
+  });
+
+  EZ.$("builderProduct").onchange=()=>{
     EZ.populateBuilderPrices();
     const product=EZ.product(EZ.$("builderProduct").value);
     if(product)EZ.$("builderDescription").value=product.description||"";

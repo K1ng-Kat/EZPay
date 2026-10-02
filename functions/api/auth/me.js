@@ -5,5 +5,10 @@ export async function onRequestGet({request,env}) {
   if(!env.DB) return json({authenticated:false},503);
   const session=await getSession(request,env);
   if(!session) return json({authenticated:false},401);
-  return json({authenticated:true,email:session.email,expiresAt:session.expiresAt});
+  return json({
+    authenticated:true,
+    email:session.email,
+    expiresAt:session.expiresAt,
+    mustChangePassword:session.mustChangePassword
+  });
 }

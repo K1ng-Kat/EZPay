@@ -79,7 +79,8 @@ export async function onRequestPut({request,env}) {
   const statements=[
     env.DB.prepare("UPDATE products SET active=0,updated_at=?").bind(now()),
     env.DB.prepare("UPDATE prices SET active=0,updated_at=?").bind(now()),
-    env.DB.prepare(\n      "INSERT INTO workspace_settings (id,business_name,accent,support_email,updated_at) VALUES ('workspace',?,?,?,?) "+
+    env.DB.prepare(
+      "INSERT INTO workspace_settings (id,business_name,accent,support_email,updated_at) VALUES ('workspace',?,?,?,?) "+
       "ON CONFLICT(id) DO UPDATE SET business_name=excluded.business_name,accent=excluded.accent,support_email=excluded.support_email,updated_at=excluded.updated_at"
     ).bind(
       String(settings.businessName||"EZPay").slice(0,120),

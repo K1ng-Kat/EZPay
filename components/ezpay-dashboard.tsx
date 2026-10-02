@@ -65,6 +65,7 @@ const navGroups: { label: string; items: NavItem[] }[] = [
     items: [
       { label: "Home", path: "/", icon: LayoutDashboard },
       { label: "Payments", path: "/payments", icon: CreditCard },
+      { label: "Payment methods", path: "/payment-methods", icon: WalletCards },
       { label: "Balances & payouts", path: "/balances", icon: WalletCards },
       { label: "Customers", path: "/customers", icon: Users },
     ],
@@ -106,6 +107,7 @@ const navGroups: { label: string; items: NavItem[] }[] = [
 const pageMeta: Record<string, { title: string; subtitle: string }> = {
   home: { title: "Overview", subtitle: "A real-time view of your EZPay business." },
   payments: { title: "Payments", subtitle: "Search, inspect, capture, refund, and monitor every payment." },
+  "payment-methods": { title: "Payment methods", subtitle: "Manage every eligible way customers can pay through EZPay." },
   balances: { title: "Balances & payouts", subtitle: "Track available funds, pending funds, and payout history." },
   customers: { title: "Customers", subtitle: "Customer profiles, payment history, subscriptions, and lifetime value." },
   products: { title: "Products", subtitle: "Manage products, recurring prices, and one-time prices." },
@@ -610,6 +612,84 @@ function LogsPage() {
   );
 }
 
+
+function PaymentMethodsPage() {
+  const groups: { icon: Icon; title: string; description: string; methods: string[] }[] = [
+    {
+      icon: CreditCard,
+      title: "Cards",
+      description: "Global and regional card networks supported by the provider.",
+      methods: ["Visa", "Mastercard", "American Express", "Discover", "Diners Club", "JCB", "China UnionPay", "Cartes Bancaires", "eftpos"],
+    },
+    {
+      icon: Smartphone,
+      title: "Wallets",
+      description: "Fast wallet checkout, dynamically shown when the customer is eligible.",
+      methods: ["Apple Pay", "Google Pay", "Link", "Amazon Pay", "Cash App Pay", "PayPal", "Alipay", "WeChat Pay", "Revolut Pay", "MobilePay", "PayPay", "GrabPay", "Satispay", "MB WAY"],
+    },
+    {
+      icon: Landmark,
+      title: "Bank debits",
+      description: "Provider-hosted bank debit collection without EZPay storing bank login credentials.",
+      methods: ["ACH Direct Debit", "SEPA Direct Debit", "Bacs Direct Debit", "Canadian PADs", "AU BECS Direct Debit", "NZ BECS Direct Debit"],
+    },
+    {
+      icon: ArrowUpRight,
+      title: "Bank redirects & real-time pay",
+      description: "Regional authenticated bank flows and instant-pay rails.",
+      methods: ["iDEAL / Wero", "Bancontact", "BLIK", "EPS", "P24", "FPX", "PayNow", "UPI", "TWINT", "Swish", "PromptPay", "Pix", "PayTo"],
+    },
+    {
+      icon: Repeat2,
+      title: "Buy now, pay later",
+      description: "Installment options shown only when the amount, country, currency, and business are eligible.",
+      methods: ["Klarna", "Affirm", "Afterpay / Clearpay", "Zip", "Meses sin intereses"],
+    },
+    {
+      icon: Receipt,
+      title: "Transfers & vouchers",
+      description: "Bank transfer and cash-voucher style payment flows for supported regions.",
+      methods: ["USD Bank Transfer", "SEPA Bank Transfer", "UK Bank Transfer", "Japan Bank Transfer", "Mexico Bank Transfer", "Multibanco", "Konbini", "OXXO", "Boleto"],
+    },
+  ];
+
+  return (
+    <>
+      <div className="callout payment-method-callout">
+        <ShieldCheck />
+        <div>
+          <strong>Dynamic methods are enabled.</strong><br />
+          EZPay asks the payment provider to automatically show the payment methods your account and each transaction are eligible for. The list can change by country, currency, amount, device, browser, merchant category, and account approval.
+        </div>
+      </div>
+
+      <div className="feature-grid section-gap">
+        {groups.map((group) => {
+          const I = group.icon;
+          return (
+            <div className="feature-card payment-method-group" key={group.title}>
+              <div className="feature-icon"><I /></div>
+              <strong>{group.title}</strong>
+              <p>{group.description}</p>
+              <div className="method-chip-wrap">
+                {group.methods.map((method) => <span className="method-chip" key={method}>{method}</span>)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="callout section-gap">
+        <AlertTriangle />
+        <div>
+          <strong>Bank connection is unsupported.</strong><br />
+          EZPay supports eligible bank-payment flows, but does not provide persistent account aggregation or store online-banking usernames/passwords.
+        </div>
+      </div>
+    </>
+  );
+}
+
 function SettingsPage() {
   const [methods, setMethods] = useState({ card: true, apple: true, google: true, ach: true });
   const toggle = (k: keyof typeof methods) => setMethods((m) => ({ ...m, [k]: !m[k] }));
@@ -675,6 +755,7 @@ function renderPage(section: string) {
   switch (section) {
     case "home": return <Home />;
     case "payments": return <PaymentsPage />;
+    case "payment-methods": return <PaymentMethodsPage />;
     case "balances": return <BalancesPage />;
     case "customers": return <CustomersPage />;
     case "products": return <ProductsPage />;

@@ -1,17 +1,24 @@
 import {cookieMap, error, now} from "./http.js";
-import {constantTimeStringEqual, randomToken, sha256} from "./crypto.js";
+import {randomToken, sha256} from "./crypto.js";
+import {verifyPassword,newPasswordSalt,derivePasswordHash} from "./password.js";
 
 export const SESSION_COOKIE="ezpay_session";
+
+export async function getOwnerCredential(env) {
+  return env.DB.prepare("SELECT * FROM owner_credentials WHERE id='owner'").first();
+}
 
 export async function createSession(env) {
   const token=randomToken(32);
   const hash=await sha256(token);
   const hours=Math.max(1,Math.min(168,Number(env.EZPAY_SESSION_HOURS||12)));
   const expires=now()+hours*60*60*1000;
+  const owner=await getOwnerCredential(env);
+  const email=owner?.email||"owner@ezpay.local";
   await env.DB.prepare(
     "INSERT INTO sessions (token_hash,owner_email,created_at,expires_at) VALUES (?,?,?,?)"
-  ).bind(hash,env.EZPAY_OWNER_EMAIL||"owner@ezpay.local",now(),expires).run();
-  return {token,expires};
+  ).bind(hash,email,now(),expires).run();
+  return {token,expires,email,mustChangePassword:Boolean(Number(owner?.must_change_password||0))};
 }
 
 export function sessionCookie(token,expires) {
@@ -42,7 +49,12 @@ export async function getSession(request,env) {
     await env.DB.prepare("DELETE FROM sessions WHERE token_hash=?").bind(hash).run();
     return null;
   }
-  return {email:row.owner_email,expiresAt:Number(row.expires_at)};
+  const owner=await getOwnerCredential(env);
+  return {
+    email:row.owner_email,
+    expiresAt:Number(row.expires_at),
+    mustChangePassword:Boolean(Number(owner?.must_change_password||0))
+  };
 }
 
 export async function requireOwner(request,env) {
@@ -52,6 +64,20 @@ export async function requireOwner(request,env) {
 }
 
 export async function verifyOwnerPassword(password,env) {
-  if(!env.EZPAY_OWNER_PASSWORD) return false;
-  return constantTimeStringEqual(String(password||""),String(env.EZPAY_OWNER_PASSWORD));
+  const owner=await getOwnerCredential(env);
+  if(!owner) return {ok:false,owner:null};
+  const ok=await verifyPassword(String(password||""),owner);
+  return {ok,owner};
+}
+
+export async function changeOwnerPassword(env,newPassword) {
+  const password=String(newPassword||"");
+  if(password.length<12) throw new Error("Password must be at least 12 characters.");
+  const salt=newPasswordSalt();
+  const iterations=210000;
+  const hash=await derivePasswordHash(password,salt,iterations);
+  await env.DB.prepare(
+    "UPDATE owner_credentials SET password_salt_b64=?,password_hash_b64=?,password_iterations=?,must_change_password=0,updated_at=? WHERE id='owner'"
+  ).bind(salt,hash,iterations,now()).run();
+  return true;
 }

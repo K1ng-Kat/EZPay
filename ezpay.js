@@ -45,8 +45,8 @@
       if(p)EZ.$("livePrice").innerHTML=EZ.money(p.amount,p.currency)+" <small>"+EZ.escape(EZ.interval(p))+"</small>";
     });
     document.querySelector('#liveCheckoutForm input[name="card"]')?.addEventListener("input",(e)=>{
-      const digits=e.target.value.replace(/\\D/g,"").slice(0,16);
-      e.target.value=digits.replace(/(\\d{4})(?=\\d)/g,"$1 ");
+      const digits=e.target.value.replace(/\D/g,"").slice(0,16);
+      e.target.value=digits.replace(/(\d{4})(?=\d)/g,"$1 ");
     });
     EZ.$("liveCheckoutForm").onsubmit=(event)=>EZ.completeCheckout(event,page,product);
   };
@@ -68,7 +68,7 @@
           name:String(form.get("name")||form.get("cardName")||"Customer").trim(),
           email:String(form.get("email")||"").trim().toLowerCase(),
           address:String(form.get("address")||"").trim(),
-          card:String(form.get("card")||"").replace(/\\D/g,"")
+          card:String(form.get("card")||"").replace(/\D/g,"")
         })
       });
 
@@ -104,6 +104,28 @@
   };
 
   EZ.handleRoute=async()=>{
+    const hash=location.hash||"";
+    if(hash.startsWith("#/checkout/")){
+      const slug=decodeURIComponent(hash.slice("#/checkout/".length));
+      EZ.$("checkoutRoute").classList.remove("hidden");
+      try{
+        const data=await EZ.api("/api/public/pages/"+encodeURIComponent(slug));
+        const product={...data.product,created:Date.now()};
+        const page={...data.page,created:Date.now(),updated:Date.now()};
+        const pi=EZ.state.products.findIndex((p)=>p.id===product.id);
+        if(pi>=0)EZ.state.products[pi]=product;else EZ.state.products.push(product);
+        const gi=EZ.state.pages.findIndex((p)=>p.id===page.id);
+        if(gi>=0)EZ.state.pages[gi]=page;else EZ.state.pages.push(page);
+        EZ.renderCheckout(page);
+      }catch(error){
+        EZ.$("checkoutRouteContent").innerHTML='<article class="card panel-pad"><h2>Payment page unavailable</h2><p class="muted-cell">'+EZ.escape(error.message)+'</p></article>';
+      }
+      return;
+    }
+    EZ.$("checkoutRoute").classList.add("hidden");
+    if(hash.startsWith("#/"))EZ.setView(hash.slice(2));
+  };
+
   EZ.exportCsv=(kind)=>{
     let rows=[];
     if(kind==="payments")rows=[["id","amount","currency","status","customer_email","description","method","created"],...EZ.state.payments.map((p)=>[p.id,p.amount,p.currency,p.status,p.customerEmail,p.description,p.method,new Date(p.created).toISOString()])];

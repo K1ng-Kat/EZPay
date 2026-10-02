@@ -72,7 +72,7 @@ export async function onRequestPost(context) {
     if(idem) await env.DB.prepare(
       "INSERT OR REPLACE INTO idempotency_keys (key,scope,response_json,created_at) VALUES (?,?,?,?)"
     ).bind(idem,"checkout.complete",JSON.stringify(response),created).run();
-    await emitEvent(env,"payment.failed",response,context.waitUntil);
+    await emitEvent(env,"payment.failed",response,(p)=>context.waitUntil(p));
     return json(response,402);
   }
 
@@ -130,7 +130,7 @@ export async function onRequestPost(context) {
   await audit(env,"public_checkout","checkout.complete","payment",paymentId,{
     pageId:page.id,productId:page.product_id,priceId:price.id,customerId:customer.id
   });
-  await emitEvent(env,"payment.succeeded",response,context.waitUntil);
-  if(subscription) await emitEvent(env,"subscription.updated",response,context.waitUntil);
+  await emitEvent(env,"payment.succeeded",response,(p)=>context.waitUntil(p));
+  if(subscription) await emitEvent(env,"subscription.updated",response,(p)=>context.waitUntil(p));
   return json(response);
 }

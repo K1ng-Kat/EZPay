@@ -202,3 +202,6 @@ th{background:rgba(255,255,255,.025);color:#667287;border-color:rgba(255,255,255
 .auth-orbit{position:absolute;border:1px solid rgba(119,101,255,.09);border-radius:50%;pointer-events:none}.auth-orbit-a{width:620px;height:620px;left:-270px;top:-310px;box-shadow:0 0 0 90px rgba(100,86,255,.018)}.auth-orbit-b{width:520px;height:520px;right:-190px;bottom:-250px;box-shadow:0 0 0 75px rgba(74,206,255,.015)}
 @media(max-width:1000px){.command-hero{grid-template-columns:1fr}.money-map{min-height:220px}.auth-shell{grid-template-columns:1fr}.auth-aside{display:none}}
 @media(max-width:760px){#app{grid-template-columns:1fr}.workspace{padding:22px 16px 50px}.command-copy h2{font-size:31px}.command-hero{padding:22px}.money-node{width:96px}.auth-panel{padding:32px 22px}.auth-copy h1{font-size:37px}.topbar{padding:0 14px}}
+
+body.auth-required #app{visibility:hidden;pointer-events:none}
+body.auth-required .auth-shell{visibility:visible}

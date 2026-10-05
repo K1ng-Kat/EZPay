@@ -1,65 +1,93 @@
 # EZPay
 
-Private payment operations dashboard and checkout layer built with Next.js, TypeScript, Stripe Elements, and Stripe PaymentIntents.
+EZPay is a private, owner-operated payment operating system for Aura.
 
-## Implemented
+It owns the application layer end to end:
 
-- Owner-only signed dashboard sessions
-- Payments, balances, payouts, customers, products, subscriptions, invoices, payment links, disputes, risk controls, reports, developer tools, API keys, webhooks, logs, and settings
-- Dynamic Payment Element checkout
-- Express Checkout Element for eligible wallets
-- Cards, wallet methods, bank debit/redirect methods, BNPL, vouchers, and regional methods via provider eligibility
-- Private server-to-server EZPay payment API
-- Verified Stripe webhook endpoint
-- Idempotency support
-- Server-owned hosted-checkout pricing
-- Same-origin protection for browser payment creation
-- Hardened browser security headers
-- Bank connection explicitly unsupported
+- owner authentication
+- products and prices
+- hosted payment pages
+- customers
+- payments
+- subscriptions
+- entitlements
+- refunds and payout records
+- API keys
+- signed webhooks
+- audit logs
+- risk controls
+- ledger state
+- Cloudflare Pages Functions + D1 persistence
 
-## Environment variables
+## Architecture
 
-Copy `.env.example` to `.env.local` and configure:
+EZPay is not a wrapper around another branded checkout product.
 
-```bash
-STRIPE_SECRET_KEY=
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
-STRIPE_WEBHOOK_SECRET=
+The EZPay frontend, APIs, dashboard, database model, payment-page builder, subscriptions, entitlement system, and webhook model are all EZPay-owned.
 
-EZPAY_OWNER_PASSWORD=
-EZPAY_SESSION_SECRET=
-EZPAY_API_SECRET=
-```
+Real money movement is exposed through a provider-neutral **rail adapter**. That adapter is the boundary between EZPay and the regulated acquiring / banking / card-network infrastructure required to actually authorize, capture, refund, and settle funds.
 
-Use long, randomly generated values for `EZPAY_SESSION_SECRET` and `EZPAY_API_SECRET`.
+No raw PAN/CVV should ever be stored in D1 or application logs.
 
-## Local development
+## Rail adapter contract
 
-```bash
-npm install
-npm run dev
-```
+A production rail implementation must support these capabilities behind EZPay's own API:
 
-Open `/login` for the private dashboard and `/checkout` for the public checkout.
+- tokenize payment credentials through a compliant hosted field / tokenization surface
+- authorize
+- capture
+- void
+- refund
+- recurring credential / mandate creation
+- recurring charge
+- payout / settlement status
+- normalized webhook events
+- idempotency
+- network error normalization
 
-## Payment methods
+See `functions/_lib/rail.js`.
 
-EZPay uses dynamic payment methods instead of hard-coding a promise that every method will appear. The configured processor decides which enabled methods are eligible for a specific account and transaction based on business location/category, customer location, currency, amount, browser, device, and method-specific restrictions.
+## Cloudflare
 
-Express Checkout can surface eligible express methods such as Apple Pay, Google Pay, Link, Amazon Pay, PayPal, and Klarna. The Payment Element can surface eligible cards, Cash App Pay, ACH/bank methods, BNPL, vouchers, and regional payment methods.
+Production frontend/backend:
 
-## Security model
+- Cloudflare Pages
+- Pages Functions
+- D1
+- owner-only dashboard
+- public hosted checkout routes
 
-Sensitive payment credentials are collected by provider-hosted Elements and are not posted to EZPay. Fulfillment must rely on verified webhook state, not only the browser success page.
+Health:
 
-For production, also use infrastructure-level rate limiting/WAF rules, persistent database-backed event/audit storage, secret rotation, backups, and MFA/passkeys for the owner account.
+`GET /api/health`
 
-## Wallet domain registration
+## Aura
 
-After deploying your checkout domain, register its hostname with Stripe so eligible web wallets can appear:
+Aura web purchases are intended to use EZPay-hosted checkout and EZPay-issued entitlement state.
 
-```bash
-STRIPE_SECRET_KEY=sk_... npm run register:domain -- pay.example.com
-```
+Current direct-web prices in the Aura app are:
 
-For this Stripe Elements web integration, EZPay does not need a separate Apple API key in code. The deployed domain must be registered with Stripe for supported web payment methods such as Apple Pay, Google Pay, and Link.
+- Aura Pro Monthly: $2.49/month
+- Aura Pro Lifetime: $15.49 one-time
+
+The App Store prices remain separate.
+
+## Security
+
+- owner-only server session
+- HttpOnly + Secure + SameSite=Strict cookie
+- D1-backed sessions
+- PBKDF2-SHA256 password hashing
+- forced owner password rotation
+- login rate limiting
+- same-origin checks for owner mutations
+- idempotency keys
+- signed outbound webhooks
+- audit logging
+- no raw card storage
+
+## Real payment rails
+
+To move real money, EZPay still requires a contractual connection to an acquirer / sponsor bank / payment network and compliant tokenization infrastructure.
+
+That underlying regulated connection does not change the product architecture: buyers and Aura interact with EZPay, not with a branded third-party dashboard.

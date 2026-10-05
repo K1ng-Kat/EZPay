@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>EZPay Entitlement Tester</title>
+  <link rel="stylesheet" href="./ezpay.css">
+</head>
+<body>
+  <main style="max-width:720px;margin:40px auto;padding:20px">
+    <article class="card panel-pad">
+      <div class="card-head">
+        <div>
+          <h2>Aura entitlement tester</h2>
+          <p>Sandbox QA utility for EZPay entitlement verification.</p>
+        </div>
+      </div>
+      <form id="entitlementTestForm" class="checkout-form-grid">
+        <label class="field">
+          <span>Entitlement token</span>
+          <input id="entitlementToken" name="token" required autocomplete="off" placeholder="ent_...">
+        </label>
+        <button class="primary-button" type="submit">Verify entitlement</button>
+      </form>
+      <pre id="entitlementResult" class="code-block" style="margin-top:16px">Waiting for token…</pre>
+    </article>
+  </main>
+  <script src="./entitlement-test.js"></script>
+</body>
+</html>

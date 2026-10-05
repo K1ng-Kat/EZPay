@@ -218,7 +218,6 @@
   EZ.$("logoutButton").onclick=async()=>{
     try{await EZ.api("/api/auth/logout",{method:"POST",body:JSON.stringify({})});}catch{}
     EZ.authenticated=false;
-    EZ.toast("Signed out");
     EZ.showLogin();
   };
   EZ.$("createApiKeyButton").onclick=()=>EZ.createApiKey();
@@ -288,7 +287,12 @@
   EZ.$("checkoutBackButton").onclick=()=>{history.replaceState(null,"",location.pathname+"#/pages");EZ.$("checkoutRoute").classList.add("hidden");EZ.setView("pages");};
   window.addEventListener("hashchange",EZ.handleRoute);
 
-  EZ.renderAll();
-  EZ.renderPageActions();
-  EZ.handleRoute();
+  (async()=>{
+    await EZ.bootstrap();
+    if(!document.body.classList.contains("auth-required")){
+      EZ.renderAll();
+      EZ.renderPageActions();
+      await EZ.handleRoute();
+    }
+  })();
 })();

@@ -57,9 +57,12 @@ export async function getSession(request,env) {
   };
 }
 
-export async function requireOwner(request,env) {
+export async function requireOwner(request,env,options={}) {
   const session=await getSession(request,env);
   if(!session) return {response:error("Authentication required",401,"unauthorized")};
+  if(session.mustChangePassword&&!options.allowPasswordChange) {
+    return {response:error("Password change required",403,"password_change_required")};
+  }
   return {session};
 }
 
@@ -72,9 +75,9 @@ export async function verifyOwnerPassword(password,env) {
 
 export async function changeOwnerPassword(env,newPassword) {
   const password=String(newPassword||"");
-  if(password.length<12) throw new Error("Password must be at least 12 characters.");
+  if(password.length<14) throw new Error("Password must be at least 14 characters.");
   const salt=newPasswordSalt();
-  const iterations=210000;
+  const iterations=310000;
   const hash=await derivePasswordHash(password,salt,iterations);
   await env.DB.prepare(
     "UPDATE owner_credentials SET password_salt_b64=?,password_hash_b64=?,password_iterations=?,must_change_password=0,updated_at=? WHERE id='owner'"

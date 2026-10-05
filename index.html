@@ -8,7 +8,25 @@
   <meta name="description" content="EZPay private payment operating system for subscriptions, customers, payment pages, and money movement." />
   <link rel="stylesheet" href="./ezpay.css" />
 </head>
-<body>\n  <section class="auth-shell hidden" id="authShell" aria-label="EZPay owner sign in">\n    <div class="auth-orbit auth-orbit-a"></div><div class="auth-orbit auth-orbit-b"></div>\n    <div class="auth-panel">\n      <div class="auth-brand"><span class="auth-glyph">EZ</span><div><strong>EZPay</strong><small>Private payment OS</small></div></div>\n      <div class="auth-copy"><span class="eyebrow">OWNER ACCESS</span><h1>Your money command center.</h1><p>One private control room for Aura subscriptions, customers, payment pages, payouts, and developer infrastructure.</p></div>\n      <form id="ownerLoginForm" class="auth-form">\n        <label><span>Email</span><input id="loginEmail" name="email" type="email" value="mk3727.2012@gmail.com" readonly autocomplete="username"></label>\n        <label><span>Password</span><input id="loginPassword" name="password" type="password" required minlength="8" autocomplete="current-password" placeholder="Enter password"></label>\n        <div id="loginError" class="auth-error hidden"></div>\n        <button type="submit" class="auth-submit">Enter EZPay <span>→</span></button>\n      </form>\n      <div class="auth-security"><span></span>Protected by server-side sessions, rate limits, and forced password rotation.</div>\n    </div>\n    <aside class="auth-aside">\n      <div class="signal-card"><span>LIVE SYSTEM</span><strong>Cloudflare + D1</strong><small>Private owner workspace</small></div>\n      <div class="signal-grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>\n    </aside>\n  </section>
+<body>
+  <section class="auth-shell hidden" id="authShell" aria-label="EZPay owner sign in">
+    <div class="auth-orbit auth-orbit-a"></div><div class="auth-orbit auth-orbit-b"></div>
+    <div class="auth-panel">
+      <div class="auth-brand"><span class="auth-glyph">EZ</span><div><strong>EZPay</strong><small>Private payment OS</small></div></div>
+      <div class="auth-copy"><span class="eyebrow">OWNER ACCESS</span><h1>Your money command center.</h1><p>One private control room for Aura subscriptions, customers, payment pages, payouts, and developer infrastructure.</p></div>
+      <form id="ownerLoginForm" class="auth-form">
+        <label><span>Email</span><input id="loginEmail" name="email" type="email" value="mk3727.2012@gmail.com" readonly autocomplete="username"></label>
+        <label><span>Password</span><input id="loginPassword" name="password" type="password" required minlength="8" autocomplete="current-password" placeholder="Enter password"></label>
+        <div id="loginError" class="auth-error hidden"></div>
+        <button type="submit" class="auth-submit">Enter EZPay <span>→</span></button>
+      </form>
+      <div class="auth-security"><span></span>Protected by server-side sessions, rate limits, and forced password rotation.</div>
+    </div>
+    <aside class="auth-aside">
+      <div class="signal-card"><span>LIVE SYSTEM</span><strong>Cloudflare + D1</strong><small>Private owner workspace</small></div>
+      <div class="signal-grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </aside>
+  </section>
   <div id="app">
     <aside class="sidebar" id="sidebar">
       <div class="brand">
@@ -52,7 +70,8 @@
     </aside>
 
     <main class="main">
-      <div class="sandbox-banner"><strong>Test</strong><span>You’re testing in a sandbox. Changes here won’t affect live payment rails.</span></div>\n      <header class="topbar">
+      <div class="sandbox-banner"><strong>PRIVATE</strong><span>Owner-only payment control center · live payment rail connects separately.</span></div>
+      <header class="topbar">
         <button class="mobile-menu" id="mobileMenu">☰</button>
         <div class="global-search">
           <span>⌕</span>
@@ -60,10 +79,7 @@
           <kbd>⌘ K</kbd>
         </div>
         <div class="topbar-spacer"></div>
-        <div class="mode-switch" role="group" aria-label="Environment">
-          <button class="active">Test</button>
-          <button disabled title="Production rails are not connected">Live</button>
-        </div>
+        <div class="mode-switch" role="group" aria-label="Workspace status"><button class="active">Owner only</button><button disabled>Rail pending</button></div>
         <button class="top-icon" id="refreshButton" title="Refresh">↻</button>
         <button class="top-icon" title="Notifications">◔</button>
         <button class="user-avatar" id="logoutButton" title="Sign out">MK</button>
@@ -79,7 +95,25 @@
         </div>
 
         <section class="view active" id="view-home">
-          <section class="command-hero">\n            <div class="command-copy">\n              <span class="eyebrow">MONEY COMMAND CENTER</span>\n              <h2>Move money without losing the plot.</h2>\n              <p>Track Aura subscriptions, revenue, customers, entitlements, and payment infrastructure from one private surface.</p>\n              <div class="command-actions"><button class="primary-button" data-action="new-page">Launch payment page</button><button class="secondary-button" data-view-jump="developers">Connect rail</button></div>\n            </div>\n            <div class="money-map">\n              <div class="money-node node-customer"><span>BUYER</span><strong>Customer</strong></div>\n              <div class="money-path path-a"></div>\n              <div class="money-node node-ezpay"><span>CORE</span><strong>EZPay</strong></div>\n              <div class="money-path path-b"></div>\n              <div class="money-node node-aura"><span>PRODUCT</span><strong>Aura Pro</strong></div>\n              <div class="money-path path-c"></div>\n              <div class="money-node node-bank"><span>SETTLEMENT</span><strong>Rail</strong></div>\n              <div class="pulse-dot p1"></div><div class="pulse-dot p2"></div><div class="pulse-dot p3"></div>\n            </div>\n          </section>\n          <div class="stats-grid" id="homeStats"></div>
+          <section class="command-hero">
+            <div class="command-copy">
+              <span class="eyebrow">MONEY COMMAND CENTER</span>
+              <h2>Move money without losing the plot.</h2>
+              <p>Track Aura subscriptions, revenue, customers, entitlements, and payment infrastructure from one private surface.</p>
+              <div class="command-actions"><button class="primary-button" data-action="new-page">Launch payment page</button><button class="secondary-button" data-view-jump="developers">Connect rail</button></div>
+            </div>
+            <div class="money-map">
+              <div class="money-node node-customer"><span>BUYER</span><strong>Customer</strong></div>
+              <div class="money-path path-a"></div>
+              <div class="money-node node-ezpay"><span>CORE</span><strong>EZPay</strong></div>
+              <div class="money-path path-b"></div>
+              <div class="money-node node-aura"><span>PRODUCT</span><strong>Aura Pro</strong></div>
+              <div class="money-path path-c"></div>
+              <div class="money-node node-bank"><span>SETTLEMENT</span><strong>Rail</strong></div>
+              <div class="pulse-dot p1"></div><div class="pulse-dot p2"></div><div class="pulse-dot p3"></div>
+            </div>
+          </section>
+          <div class="stats-grid" id="homeStats"></div>
           <div class="home-grid gap-top">
             <article class="card chart-card">
               <div class="card-head">
@@ -125,7 +159,7 @@
         <section class="view" id="view-balances">
           <div class="stats-grid" id="balanceStats"></div>
           <div class="two-col gap-top">
-            <article class="card panel-pad"><div class="card-head"><div><h2>Available balance</h2><p>Funds available for payout</p></div></div><div class="hero-number" id="availableBalance">$0.00</div><button class="primary-button" id="createPayoutButton">Create sandbox payout</button></article>
+            <article class="card panel-pad"><div class="card-head"><div><h2>Available balance</h2><p>Funds available for payout</p></div></div><div class="hero-number" id="availableBalance">$0.00</div><button class="primary-button" id="createPayoutButton">Create payout</button></article>
             <article class="card panel-pad"><div class="card-head"><div><h2>Payout schedule</h2><p>How funds move from the EZPay ledger</p></div></div><div class="setting-row"><div><strong>Manual until rail is connected</strong><small>Settlement rail not connected yet</small></div><span class="pill neutral">Sandbox</span></div></article>
           </div>
           <article class="card gap-top"><div class="card-head padded"><div><h2>Payouts</h2><p>Payout history</p></div></div><div class="table-wrap"><table><thead><tr><th>Amount</th><th>Status</th><th>Destination</th><th>Created</th></tr></thead><tbody id="payoutsBody"></tbody></table></div></article>
@@ -158,16 +192,16 @@
 
         <section class="view" id="view-risk">
           <div class="stats-grid">
-            <article class="stat-card"><span>Blocked attempts</span><strong id="blockedCount">0</strong><small>Sandbox declined payments</small></article>
+            <article class="stat-card"><span>Blocked attempts</span><strong id="blockedCount">0</strong><small>Declined payments</small></article>
             <article class="stat-card"><span>Rules</span><strong>4</strong><small>Enabled in sandbox</small></article>
             <article class="stat-card"><span>3DS policy</span><strong>Adaptive</strong><small>Production adapter required</small></article>
-            <article class="stat-card"><span>Card data stored</span><strong>0</strong><small>Sandbox test card values are discarded</small></article>
+            <article class="stat-card"><span>Card data stored</span><strong>0</strong><small>Sensitive card data is never stored by EZPay</small></article>
           </div>
           <article class="card panel-pad gap-top">
-            <div class="card-head"><div><h2>Risk rules</h2><p>Applied before a sandbox payment succeeds</p></div></div>
+            <div class="card-head"><div><h2>Risk rules</h2><p>Applied before a payment succeeds</p></div></div>
             <div class="rule-list">
-              <div><div><strong>Reject non-test card numbers</strong><small>Prevents the Pages demo from accepting real payment credentials.</small></div><button class="switch on" aria-label="Enabled"></button></div>
-              <div><div><strong>Decline 4000 0000 0000 0002</strong><small>Deterministic sandbox decline card.</small></div><button class="switch on" aria-label="Enabled"></button></div>
+              <div><div><strong>Reject non-test card numbers</strong><small>Rejects unsupported card collection paths until a certified rail is connected.</small></div><button class="switch on" aria-label="Enabled"></button></div>
+              <div><div><strong>Decline 4000 0000 0000 0002</strong><small>Deterministic decline rule used for QA.</small></div><button class="switch on" aria-label="Enabled"></button></div>
               <div><div><strong>Duplicate checkout protection</strong><small>Prevents a double-submit from creating two subscriptions.</small></div><button class="switch on" aria-label="Enabled"></button></div>
               <div><div><strong>No bank-login storage</strong><small>Persistent bank connection remains unsupported.</small></div><button class="switch on" aria-label="Enabled"></button></div>
             </div>
@@ -177,7 +211,7 @@
         <section class="view" id="view-developers">
           <div class="two-col">
             <article class="card panel-pad">
-              <div class="card-head"><div><h2>Sandbox API model</h2><p>EZPay-native resource shape</p></div><span class="pill success">Ready</span></div>
+              <div class="card-head"><div><h2>EZPay API model</h2><p>EZPay-native resource shape</p></div><span class="pill success">Ready</span></div>
               <pre class="code-block"><code>POST /v1/payment_intents
 
 {
@@ -261,7 +295,8 @@
         </div>
         <div class="builder-section">
           <h3>Branding</h3>
-          <label class="field"><span>Brand name</span><input id="builderBrand" /></label>\n          <label class="field"><span>Logo</span><input type="file" id="builderLogo" accept="image/png,image/jpeg,image/webp,image/svg+xml" /><small>Stored locally in this browser · max 400 KB</small></label>
+          <label class="field"><span>Brand name</span><input id="builderBrand" /></label>
+          <label class="field"><span>Logo</span><input type="file" id="builderLogo" accept="image/png,image/jpeg,image/webp,image/svg+xml" /><small>Stored locally in this browser · max 400 KB</small></label>
           <label class="field"><span>Accent</span><div class="color-input"><input type="color" id="builderAccent" /><input id="builderAccentHex" /></div></label>
         </div>
         <div class="builder-section">
@@ -286,6 +321,10 @@
 
   <div class="toast-stack" id="toastStack"></div>
 
-  <script src="./ezpay-core.js"></script>\n  <script src="./ezpay-render.js"></script>\n  <script src="./ezpay-builder.js"></script>\n  <script src="./ezpay-backend.js"></script>\n  <script src="./ezpay.js"></script>
+  <script src="./ezpay-core.js"></script>
+  <script src="./ezpay-render.js"></script>
+  <script src="./ezpay-builder.js"></script>
+  <script src="./ezpay-backend.js"></script>
+  <script src="./ezpay.js"></script>
 </body>
 </html>

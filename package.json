@@ -9,4 +9,4 @@
     "db:migrate:remote": "npx wrangler d1 migrations apply EZPAY_DB --remote",
     "deploy:cloudflare": "bash scripts/bootstrap-cloudflare.sh"
   }
-}\n
+}

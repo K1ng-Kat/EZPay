@@ -77,7 +77,7 @@
       }
 
       const entitlementBlock=result.entitlementToken
-        ? '<div class="test-banner" style="text-align:left"><strong>Aura entitlement token</strong><br><code id="entitlementTokenValue">'+EZ.escape(result.entitlementToken)+'</code><br><span>Copy this into Aura while testing. Production Aura can verify it through EZPay.</span></div><button class="secondary-button" id="copyEntitlementButton">Copy entitlement token</button>'
+        ? '<div class="test-banner" style="text-align:left"><strong>Aura entitlement token</strong><br><code id="entitlementTokenValue">'+EZ.escape(result.entitlementToken)+'</code><br><span>Copy this into Aura while testing. Production Aura can verify it through EZPay.</span></div><div class="form-actions"><button class="secondary-button" id="copyEntitlementButton">Copy entitlement token</button><button class="primary-button" id="verifyEntitlementButton">Verify entitlement</button></div><div id="entitlementVerifyResult" class="muted-cell"></div>'
         : "";
 
       EZ.$("checkoutRouteContent").innerHTML=
@@ -88,6 +88,17 @@
         '</p>'+entitlementBlock+'<button class="primary-button" id="successDashboardButton">View in EZPay</button></div></div>';
 
       EZ.$("copyEntitlementButton")?.addEventListener("click",()=>EZ.copyText(result.entitlementToken));
+      EZ.$("verifyEntitlementButton")?.addEventListener("click",async()=>{
+        const box=EZ.$("entitlementVerifyResult");
+        try{
+          const verified=await EZ.api("/api/v1/entitlements/verify",{method:"POST",body:JSON.stringify({token:result.entitlementToken})});
+          box.textContent=verified.active?"Verified: Aura Pro is active through "+new Date(verified.currentPeriodEnd).toLocaleString():"Verified: "+verified.status;
+          box.dataset.active=verified.active?"true":"false";
+        }catch(error){
+          box.textContent="Verification failed: "+error.message;
+          box.dataset.active="false";
+        }
+      });
       EZ.$("successDashboardButton").onclick=()=>{
         history.replaceState(null,"",location.pathname+"#/subscriptions");
         EZ.$("checkoutRoute").classList.add("hidden");

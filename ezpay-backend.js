@@ -73,27 +73,90 @@
     EZ._syncTimer=setTimeout(()=>EZ.syncRemote(),180);
   };
 
-  EZ.showLogin=()=>{
-    EZ.openModal(
-      "Sign in to EZPay",
-      "Your Cloudflare-backed dashboard is private. Public payment pages stay available without signing in.",
-      '<form id="ownerLoginForm"><label class="field"><span>Owner password</span><input name="password" type="password" required minlength="8" autocomplete="current-password" placeholder="Enter owner password" /></label><div id="loginError" class="checkout-error hidden"></div><div class="form-actions"><button type="submit" class="primary-button">Sign in</button></div></form>'
-    );
-    EZ.$("modalClose").style.display="none";
-    EZ.$("ownerLoginForm").onsubmit=async(event)=>{
+  EZ.hideAuth=()=>{
+    document.body.classList.remove("auth-required");
+    EZ.$("authShell")?.classList.add("hidden");
+  };
+
+  EZ.showPasswordRotation=(knownCurrentPassword="")=>{
+    document.body.classList.add("auth-required");
+    const shell=EZ.$("authShell");
+    shell?.classList.remove("hidden");
+    const panel=shell?.querySelector(".auth-panel");
+    if(!panel)return;
+    panel.innerHTML=
+      '<div class="auth-brand"><span class="auth-glyph">EZ</span><div><strong>EZPay</strong><small>Security checkpoint</small></div></div>'+
+      '<div class="auth-copy"><span class="eyebrow">PASSWORD ROTATION REQUIRED</span><h1>Lock down your owner account.</h1><p>The bootstrap credential can never unlock the dashboard directly. Replace it with a unique 14+ character password before EZPay exposes protected data.</p></div>'+
+      '<form id="passwordRotationForm" class="auth-form">'+
+        '<label><span>Current password</span><input name="currentPassword" type="password" required autocomplete="current-password" value="'+EZ.escape(knownCurrentPassword)+'"></label>'+
+        '<label><span>New password</span><input name="newPassword" type="password" required minlength="14" autocomplete="new-password" placeholder="14+ characters"></label>'+
+        '<label><span>Confirm new password</span><input name="confirmPassword" type="password" required minlength="14" autocomplete="new-password" placeholder="Repeat new password"></label>'+
+        '<div id="rotationError" class="auth-error hidden"></div>'+
+        '<button type="submit" class="auth-submit">Secure account <span>→</span></button>'+
+      '</form>'+
+      '<div class="auth-security"><span></span>PBKDF2-SHA256 · 310,000 iterations · server-side session only.</div>';
+
+    EZ.$("passwordRotationForm").onsubmit=async(event)=>{
       event.preventDefault();
-      const form=new FormData(event.currentTarget);
-      const box=EZ.$("loginError");
-      box.classList.add("hidden");
+      const data=new FormData(event.currentTarget);
+      const currentPassword=String(data.get("currentPassword")||"");
+      const next=String(data.get("newPassword")||"");
+      const confirm=String(data.get("confirmPassword")||"");
+      const errorBox=EZ.$("rotationError");
+      errorBox.classList.add("hidden");
+      if(next.length<14||next!==confirm){
+        errorBox.textContent=next!==confirm?"Passwords do not match.":"Use at least 14 characters.";
+        errorBox.classList.remove("hidden");
+        return;
+      }
       try{
-        await EZ.api("/api/auth/login",{method:"POST",body:JSON.stringify({password:String(form.get("password")||"")})});
-        EZ.authenticated=true;
+        await EZ.api("/api/auth/change-password",{method:"POST",body:JSON.stringify({currentPassword,newPassword:next})});
         await EZ.loadRemote();
-        EZ.$("modalClose").style.display="";
-        EZ.closeModal();
+        EZ.hideAuth();
         EZ.renderAll();
-        EZ.toast("Signed in","Cloudflare D1 is now the source of truth.");
+        EZ.renderPageActions();
+        EZ.toast("Owner account secured","Your new password is active.");
       }catch(error){
+        errorBox.textContent=error.message;
+        errorBox.classList.remove("hidden");
+      }
+    };
+  };
+
+  EZ.showLogin=()=>{
+    document.body.classList.add("auth-required");
+    const shell=EZ.$("authShell");
+    shell?.classList.remove("hidden");
+    const email=EZ.$("loginEmail");
+    const password=EZ.$("loginPassword");
+    const errorBox=EZ.$("loginError");
+    if(email)email.value="mk3727.2012@gmail.com";
+    if(password)password.value="";
+    errorBox?.classList.add("hidden");
+
+    const form=EZ.$("ownerLoginForm");
+    if(!form)return;
+    form.onsubmit=async(event)=>{
+      event.preventDefault();
+      const data=new FormData(event.currentTarget);
+      const submittedPassword=String(data.get("password")||"");
+      try{
+        const result=await EZ.api("/api/auth/login",{method:"POST",body:JSON.stringify({
+          email:"mk3727.2012@gmail.com",
+          password:submittedPassword
+        })});
+        EZ.authenticated=true;
+        if(result.mustChangePassword){
+          EZ.showPasswordRotation(submittedPassword);
+          return;
+        }
+        await EZ.loadRemote();
+        EZ.hideAuth();
+        EZ.renderAll();
+        EZ.renderPageActions();
+        EZ.toast("Welcome back","Private owner session unlocked.");
+      }catch(error){
+        const box=EZ.$("loginError");
         box.textContent=error.message;
         box.classList.remove("hidden");
       }
@@ -151,18 +214,33 @@
   };
 
   EZ.bootstrap=async()=>{
-    if(location.hash.startsWith("#/checkout/"))return;
+    if(location.hash.startsWith("#/checkout/")||location.pathname.endsWith("/entitlement-test.html")){
+      EZ.hideAuth();
+      return;
+    }
+    document.body.classList.add("auth-required");
     try{
-      await EZ.api("/api/auth/me");
+      const session=await EZ.api("/api/auth/me");
       EZ.authenticated=true;
+      if(session.mustChangePassword){
+        EZ.showPasswordRotation();
+        return;
+      }
       await EZ.loadRemote();
+      EZ.hideAuth();
     }catch(error){
       if(error.status===401){
         EZ.authenticated=false;
         EZ.showLogin();
         return;
       }
-      EZ.toast("Backend unavailable",error.message);
+      EZ.showLogin();
+      const box=EZ.$("loginError");
+      if(box){
+        box.textContent="Backend unavailable: "+error.message;
+        box.classList.remove("hidden");
+      }
     }
   };
+
 })();

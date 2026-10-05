@@ -20,71 +20,96 @@
     if(!product){EZ.$("checkoutRouteContent").innerHTML='<div class="card panel-pad">Missing product.</div>';return;}
     const prices=product.prices.filter((p)=>p.active);
     const defaultPrice=EZ.price(product,page.priceId)||prices[0];
-    const accent=/^#[0-9a-f]{6}$/i.test(page.accent)?page.accent:"#635bff";
+    const accent=/^#[0-9a-f]{6}$/i.test(page.accent)?page.accent:"#7c5cff";
     const options=prices.map((p)=>'<option value="'+p.id+'"'+(p.id===defaultPrice?.id?" selected":"")+'>'+EZ.escape(p.nickname)+' · '+EZ.money(p.amount,p.currency)+' '+EZ.escape(EZ.interval(p))+'</option>').join("");
+
     EZ.$("checkoutRouteContent").innerHTML=
       '<div class="live-checkout"><div class="live-checkout-inner">'+
       '<section class="live-summary" style="background:linear-gradient(155deg,#10172a 0%,'+EZ.escape(accent)+' 160%)">'+
       '<div class="checkout-brand-preview">'+(page.logoData?'<img src="'+EZ.escape(page.logoData)+'" alt="" />':'<span class="brand-fallback">'+EZ.escape((page.brand||"E")[0].toUpperCase())+'</span>')+EZ.escape(page.brand||"EZPay")+'</div>'+
       '<h1>'+EZ.escape(page.headline)+'</h1><p>'+EZ.escape(page.description||product.description||"")+'</p>'+
       '<div class="live-price" id="livePrice">'+(defaultPrice?EZ.money(defaultPrice.amount,defaultPrice.currency):"$0.00")+' <small>'+EZ.escape(EZ.interval(defaultPrice))+'</small></div>'+
-      '<div class="preview-order"><span>'+EZ.escape(product.name)+'</span><strong>Sandbox</strong></div></section>'+
-      '<section class="live-form"><h2>Subscribe to '+EZ.escape(product.name)+'</h2><p>This checkout creates real sandbox customer, payment, and subscription records inside EZPay.</p>'+
-      '<div class="test-banner"><strong>Test cards only:</strong> <code>4242 4242 4242 4242</code> succeeds · <code>4000 0000 0000 0002</code> declines. Real card numbers are rejected and never stored.</div>'+
+      '<div class="preview-order"><span>'+EZ.escape(product.name)+'</span><strong>Secure card checkout</strong></div></section>'+
+      '<section class="live-form"><div class="secure-checkout-kicker">EZPAY SECURE CHECKOUT</div><h2>'+EZ.escape(product.name)+'</h2><p>Your card details are tokenized inside isolated secure fields. EZPay never receives or stores the card number or CVC.</p>'+
       '<form id="liveCheckoutForm" class="checkout-form-grid">'+
       (page.collectName?'<label class="field"><span>Name</span><input name="name" required autocomplete="name" placeholder="Jane Appleseed" /></label>':"")+
       '<label class="field"><span>Email</span><input name="email" type="email" required autocomplete="email" placeholder="jane@example.com" /></label>'+
       (prices.length>1?'<label class="field"><span>Plan</span><select name="priceId" id="livePriceSelect">'+options+'</select></label>':'<input type="hidden" name="priceId" value="'+EZ.escape(defaultPrice?.id||"")+'" />')+
-      (page.collectAddress?'<label class="field"><span>Billing address</span><input name="address" required placeholder="123 Main Street" /></label>':"")+
-      '<label class="field"><span>Card number</span><input name="card" required inputmode="numeric" autocomplete="off" placeholder="4242 4242 4242 4242" maxlength="19" /></label>'+
-      '<div class="card-row"><label class="field"><span>Cardholder name</span><input name="cardName" required autocomplete="off" placeholder="Jane Appleseed" /></label><label class="field"><span>Expiry</span><input name="expiry" required autocomplete="off" placeholder="12/34" maxlength="5" /></label><label class="field"><span>CVC</span><input name="cvc" required autocomplete="off" inputmode="numeric" placeholder="123" maxlength="4" /></label></div>'+
-      '<div id="checkoutError" class="checkout-error hidden"></div><button class="submit-payment" style="background:'+EZ.escape(accent)+'" type="submit">'+EZ.escape(page.buttonText||"Subscribe")+'</button></form></section></div></div>';
+      (page.collectAddress?'<label class="field"><span>Billing address</span><input name="address" required autocomplete="billing street-address" placeholder="123 Main Street" /></label>':"")+
+      '<div class="secure-card-shell">'+
+        '<label class="field secure-field-wide"><span>Card number</span><div id="ezCardNumber" class="hosted-card-field"></div></label>'+
+        '<div class="secure-card-row"><label class="field"><span>Expiry</span><div id="ezCardExpiry" class="hosted-card-field"></div></label><label class="field"><span>CVC</span><div id="ezCardCvv" class="hosted-card-field"></div></label></div>'+
+        '<div class="secure-card-note"><span class="secure-dot"></span>Encrypted tokenization · raw card data never touches EZPay</div>'+
+      '</div>'+
+      '<div id="checkoutError" class="checkout-error hidden"></div>'+
+      '<button class="submit-payment" id="ezCardSubmit" style="background:'+EZ.escape(accent)+'" type="submit" disabled>Loading secure card fields…</button>'+
+      '</form></section></div></div>';
 
     EZ.$("livePriceSelect")?.addEventListener("change",(e)=>{
       const p=EZ.price(product,e.target.value);
       if(p)EZ.$("livePrice").innerHTML=EZ.money(p.amount,p.currency)+" <small>"+EZ.escape(EZ.interval(p))+"</small>";
     });
-    document.querySelector('#liveCheckoutForm input[name="card"]')?.addEventListener("input",(e)=>{
-      const digits=e.target.value.replace(/\D/g,"").slice(0,16);
-      e.target.value=digits.replace(/(\d{4})(?=\d)/g,"$1 ");
+
+    const button=EZ.$("ezCardSubmit");
+    EZ.cardRail.mount(accent).then(()=>{
+      button.disabled=false;
+      button.textContent=page.buttonText||"Pay securely";
+    }).catch((err)=>{
+      const box=EZ.$("checkoutError");
+      box.textContent=err.message;
+      box.classList.remove("hidden");
+      button.textContent="Card payments unavailable";
+      button.disabled=true;
     });
+
     EZ.$("liveCheckoutForm").onsubmit=(event)=>EZ.completeCheckout(event,page,product);
   };
 
   EZ.completeCheckout=async(event,page,product)=>{
     event.preventDefault();
-    const form=new FormData(event.currentTarget);
+    const formEl=event.currentTarget;
+    if(!formEl.reportValidity())return;
+
+    const form=new FormData(formEl);
     const priceId=String(form.get("priceId")||page.priceId);
     const error=EZ.$("checkoutError");
+    const button=EZ.$("ezCardSubmit");
     error.classList.add("hidden");
+    button.disabled=true;
+    const originalLabel=button.textContent;
+    button.textContent="Securing card…";
 
     try{
+      const tokenized=await EZ.cardRail.tokenize();
+      button.textContent="Processing payment…";
+
       const result=await EZ.api("/api/checkout/complete",{
         method:"POST",
         headers:{"idempotency-key":crypto.randomUUID()},
         body:JSON.stringify({
           pageSlug:page.slug,
           priceId,
-          name:String(form.get("name")||form.get("cardName")||"Customer").trim(),
+          name:String(form.get("name")||"Customer").trim(),
           email:String(form.get("email")||"").trim().toLowerCase(),
           address:String(form.get("address")||"").trim(),
-          card:String(form.get("card")||"").replace(/\D/g,"")
+          paymentToken:String(tokenized.token||"")
         })
       });
 
+      EZ.cardRail.clear();
       if(EZ.authenticated){
         try{await EZ.loadRemote();EZ.renderAll();}catch{}
       }
 
       const entitlementBlock=result.entitlementToken
-        ? '<div class="test-banner" style="text-align:left"><strong>Aura entitlement token</strong><br><code id="entitlementTokenValue">'+EZ.escape(result.entitlementToken)+'</code><br><span>Copy this into Aura while testing. Production Aura can verify it through EZPay.</span></div><div class="form-actions"><button class="secondary-button" id="copyEntitlementButton">Copy entitlement token</button><button class="primary-button" id="verifyEntitlementButton">Verify entitlement</button></div><div id="entitlementVerifyResult" class="muted-cell"></div>'
+        ? '<div class="test-banner" style="text-align:left"><strong>Aura entitlement</strong><br><code id="entitlementTokenValue">'+EZ.escape(result.entitlementToken)+'</code><br><span>Return this entitlement to Aura to unlock Pro.</span></div><div class="form-actions"><button class="secondary-button" id="copyEntitlementButton">Copy entitlement</button><button class="primary-button" id="verifyEntitlementButton">Verify entitlement</button></div><div id="entitlementVerifyResult" class="muted-cell"></div>'
         : "";
 
       EZ.$("checkoutRouteContent").innerHTML=
         '<div class="live-checkout"><div class="checkout-success-view"><div class="success-check">✓</div><h2>'+EZ.escape(result.successMessage||page.successMessage||"Payment successful")+'</h2><p>'+
         (result.subscription
-          ? 'EZPay created payment '+EZ.escape(result.payment.id)+' and subscription '+EZ.escape(result.subscription.id)+'.'
-          : 'EZPay created payment '+EZ.escape(result.payment.id)+'.')+
+          ? 'Payment '+EZ.escape(result.payment.id)+' succeeded and subscription '+EZ.escape(result.subscription.id)+' is active.'
+          : 'Payment '+EZ.escape(result.payment.id)+' succeeded.')+
         '</p>'+entitlementBlock+'<button class="primary-button" id="successDashboardButton">View in EZPay</button></div></div>';
 
       EZ.$("copyEntitlementButton")?.addEventListener("click",()=>EZ.copyText(result.entitlementToken));
@@ -92,10 +117,12 @@
         const box=EZ.$("entitlementVerifyResult");
         try{
           const verified=await EZ.api("/api/v1/entitlements/verify",{method:"POST",body:JSON.stringify({token:result.entitlementToken})});
-          box.textContent=verified.active?"Verified: Aura Pro is active through "+new Date(verified.currentPeriodEnd).toLocaleString():"Verified: "+verified.status;
+          box.textContent=verified.active
+            ? (verified.kind==="lifetime"?"Verified: Aura Pro lifetime is active.":"Verified: Aura Pro is active through "+new Date(verified.currentPeriodEnd).toLocaleString())
+            :"Verified: "+verified.status;
           box.dataset.active=verified.active?"true":"false";
-        }catch(error){
-          box.textContent="Verification failed: "+error.message;
+        }catch(err){
+          box.textContent="Verification failed: "+err.message;
           box.dataset.active="false";
         }
       });
@@ -108,6 +135,8 @@
       const message=apiError?.data?.error?.message||apiError.message||"Payment failed";
       error.textContent=message;
       error.classList.remove("hidden");
+      button.disabled=false;
+      button.textContent=originalLabel;
       if(EZ.authenticated){
         try{await EZ.loadRemote();EZ.renderAll();}catch{}
       }

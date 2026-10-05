@@ -302,7 +302,7 @@
         <div class="builder-section">
           <h3>Checkout options</h3>
           <label class="check-row"><input type="checkbox" id="builderCollectName" checked /><span><strong>Collect customer name</strong><small>Add name to the customer profile</small></span></label>
-          <label class="check-row"><input type="checkbox" id="builderCollectAddress" /><span><strong>Collect billing address</strong><small>Sandbox field only</small></span></label>
+          <label class="check-row"><input type="checkbox" id="builderCollectAddress" /><span><strong>Collect billing address</strong><small>Used for billing verification</small></span></label>
           <label class="field"><span>Trial days</span><input type="number" min="0" max="365" id="builderTrialDays" value="0" /></label>
         </div>
       </aside>
@@ -315,7 +315,7 @@
   </div>
 
   <div class="checkout-route hidden" id="checkoutRoute">
-    <div class="checkout-route-top"><button id="checkoutBackButton">← EZPay</button><span>Sandbox checkout</span></div>
+    <div class="checkout-route-top"><button id="checkoutBackButton">← EZPay</button><span>EZPay secure checkout</span></div>
     <div id="checkoutRouteContent"></div>
   </div>
 
@@ -325,6 +325,6 @@
   <script src="./ezpay-render.js"></script>
   <script src="./ezpay-builder.js"></script>
   <script src="./ezpay-backend.js"></script>
-  <script src="./ezpay.js"></script>
+  <script src="./ezpay-card-rail.js"></script>\n  <script src="./ezpay.js"></script>
 </body>
 </html>
